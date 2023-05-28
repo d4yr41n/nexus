@@ -1,60 +1,23 @@
-board = [[0 for j in range(8)] for i in range(8)]
+from game import BLACK, WHITE, Game
+from piece import Knight
+from move import Move
 
 
-class Coord:
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
+game = Game()
+game.board[0][0] = Knight(WHITE, game)
+game.board[7][7] = Knight(BLACK, game)
+game.update()
 
-    def __add__(self, coord):
-        return Coord(self.x  + coord.x, self.y + coord.y)
-
-    def __mul__(self, factor):
-        return Coord(self.x * factor, self.y * factor)
-
-
-class Piece:
-    side: bool
-    coord: Coord
-    movement: tuple
-
-    def moves(self):
-        for coord in self.movement:
-            yield self.coord + coord
-
-
-class Knight(Piece):
-    movement = (
-        Coord(2, 1), Coord(1, 2), Coord(-1, 2), Coord(-2, 1),
-        Coord(-2, -1), Coord(-1, -2), Coord(1, -2), Coord(2, -1)
-    )
-
-
-class Slide(Piece):
-    def moves(self):
-        for coord in self.movement:
-            for i in range(8):
-                yield self.coord + coord * i
-
-
-class Rook(Slide):
-    movement = Coord(1, 0), Coord(0, 1), Coord(-1, 0), Coord(0, -1)
-
-
-class Bishop(Slide):
-    movement = Coord(1, 1), Coord(-1, 1), Coord(-1, -1), Coord(1, -1)
-
-
-class Queen(Slide):
-    movement = (
-        Coord(1, 0), Coord(1, 1), Coord(0, 1), Coord(-1, 1),
-        Coord(-1, 0), Coord(-1, -1), Coord(0, -1), Coord(1, -1)
-    )
-
-
-class King(Piece):
-    movement = (
-        Coord(1, 0), Coord(1, 1), Coord(0, 1), Coord(-1, 1),
-        Coord(-1, 0), Coord(-1, -1), Coord(0, -1), Coord(1, -1)
-        )
+while True:
+    print("\033[H\033[J", end="")
+    print("    a b c d e f g h\n")
+    for y in range(7, -1, -1):
+        print(y + 1, end="   ")
+        for x in range(8):
+            print(game.board[x][y], end=" ")
+        print(f"  {y + 1}")
+    print("\n    a b c d e f g h\n")
+    move = Move.from_string(game.turn, input("> ")) 
+    if move:
+        game.move(move)
 
