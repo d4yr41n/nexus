@@ -1,11 +1,11 @@
 from game import BLACK, WHITE, Game
-from piece import Knight
+from piece import Pawn, Knight
 from move import Move
 
 
 game = Game()
-game.board[0][0] = Knight(WHITE, game)
-game.board[7][7] = Knight(BLACK, game)
+game.board[0][1] = Pawn(WHITE, game)
+game.board[7][6] = Pawn(BLACK, game)
 game.update()
 
 while True:

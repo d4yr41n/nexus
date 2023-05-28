@@ -28,14 +28,28 @@ class Pawn(Piece):
     char = "P"
 
     def __init__(self, side: WHITE | BLACK, game):
-        super().__init__(side, game, coord)
+        super().__init__(side, game)
         if side:
-            self.movement = (0, 1),
+            self.movement = 1
+            self.start = 1
         else:
-            self.movement = (0, -1),
+            self.movement = -1
+            self.start = 6
 
-    def __call__(self):
-        return
+    def __call__(self, x, y):
+        j = y + self.movement
+
+        for i in (x - 1, x + 1):
+            if -1 < i < 8: 
+                target = self.game.board[i][j]
+                if target and self.side != target.side:
+                    yield i, j
+
+        if not self.game.board[x][j]:
+            yield x, j
+            j += self.movement
+            if self.start == y and not self.game.board[x][j]:
+                yield x, j
 
 
 class Knight(Piece):
