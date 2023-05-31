@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from const import BLACK, WHITE, COLOR, Empty, Coord
+from const import BLACK, WHITE, Empty, Coord
 from move import Move
 
 if TYPE_CHECKING:
@@ -34,7 +34,7 @@ class Piece(Empty):
 
 
 class Pawn(Piece):
-    char = "P"
+    index = 1
     notation = ""
 
     def __init__(self, side: WHITE | BLACK, game: Game):
@@ -88,8 +88,8 @@ class Knight(Piece):
         Coord(2, 1), Coord(1, 2), Coord(-1, 2), Coord(-2, 1),
         Coord(-2, -1), Coord(-1, -2), Coord(1, -2), Coord(2, -1)
     )
-    char = "N"
-    notation = char
+    index = 2
+    notation = "N"
 
 
 class Slide(Piece):
@@ -112,17 +112,18 @@ class Slide(Piece):
                         break
 
 
+class Bishop(Slide):
+    movement = Coord(1, 1), Coord(-1, 1), Coord(-1, -1), Coord(1, -1) 
+    index = 3
+    notation = "B"
+
+
 class Rook(Slide):
     moved: bool = False
     movement = Coord(0, 1), Coord(1, 0), Coord(-1, 0), Coord(0, -1)
-    char = "R"
-    notation = char
+    index = 4
+    notation = "R"
 
-
-class Bishop(Slide):
-    movement = Coord(1, 1), Coord(-1, 1), Coord(-1, -1), Coord(1, -1) 
-    char = "B"
-    notation = char
 
 
 class Queen(Slide):
@@ -130,8 +131,8 @@ class Queen(Slide):
         Coord(0, 1), Coord(1, 1), Coord(1, 0), Coord(-1, 1),
         Coord(-1, 0), Coord(-1, -1), Coord(0, -1), Coord(1, -1)
     )
-    char = "Q"
-    notation = char
+    index = 5
+    notation = "Q"
 
 
 class King(Piece):
@@ -140,8 +141,8 @@ class King(Piece):
         Coord(0, 1), Coord(1, 1), Coord(1, 0), Coord(-1, 1),
         Coord(-1, 0), Coord(-1, -1), Coord(0, -1), Coord(1, -1)
     )
-    char = "K"
-    notation = char
+    index = 6
+    notation = "K"
 
     def __init__(self, side: BLACK | WHITE, game: Game):
         super().__init__(side, game)

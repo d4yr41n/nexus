@@ -4,10 +4,10 @@ from move import Move
 
 
 PIECES = {
-    Knight.char: Knight,
-    Bishop.char: Bishop,
-    Rook.char: Rook,
-    Queen.char: Queen,
+    Knight.notation: Knight,
+    Bishop.notation: Bishop,
+    Rook.notation: Rook,
+    Queen.notation: Queen,
 }
 
 

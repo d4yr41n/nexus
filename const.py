@@ -4,20 +4,18 @@ from __future__ import annotations
 BLACK = False
 WHITE = True
 
-COLOR = ("\033[34m", "\033[31m")
-
 FILES = "abcdefgh"
 RANKS = "12345678"
 
 
 class Empty:
-    char = "."
+    index = 0
 
     def __bool__(self):
         return False
 
-    def __str__(self):
-        return self.char
+    def __index__(self):
+        return self.index
 
 
 class Coord:
