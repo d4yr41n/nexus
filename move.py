@@ -1,44 +1,40 @@
-from piece import Pawn, Knight, Bishop, Rook, Queen, King
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+from const import BLACK, WHITE, Coord
+
+if TYPE_CHECKING:
+    from piece import Piece
 
 
 class Move:
-    pieces = {
-        "N": Knight,
-        "B": Bishop,
-        "R": Rook,
-        "Q": Queen,
-        "K": King
-    }
-    files = dict(zip("abcdefgh", range(8)))
-    ranks = dict(zip("12345678", range(8)))
+    check: bool = False
 
-    def __init__(self, side, piece, on_x, on_y, to_x, to_y):
-        self.side = side
+    def __init__(
+        self, piece: Piece,
+        on: Coord, to: Coord,
+        en_passant: None | Coord = None,
+        empty: bool | Coord = False,
+        new: bool | Piece = False,
+        moved: bool = False,
+        notation: None | str = None
+    ):
         self.piece = piece
-        self.on_x = on_x
-        self.on_y = on_y
-        self.to_x = to_x
-        self.to_y = to_y
+        self.on = on
+        self.to = to
+        self.en_passant = en_passant
+        self.empty = empty
+        self.new = new
+        self.moved = moved
+        self.notation = notation
         
-    def __eq__(self, move):
-        return (
-            self.side == move.side
-            and self.piece == move.piece
-            and self.to_x == move.to_x
-            and self.to_y == move.to_y
-        )
-
     def __bool__(self):
         return True
 
-    @classmethod
-    def from_string(cls, side, string):
-        cls.side = side
-        if len(string) > 1:
-            cls.piece = cls.pieces.get(string[0], Pawn)
-            to_x, to_y = cls.files.get(string[-2]), cls.ranks.get(string[-1])
-            if to_x != None and to_y != None:
-                cls.to_x = to_x
-                cls.to_y = to_y
-                return cls
+    def __str__(self):
+        return self.notation or f"{self.piece.notation}{self.on}{self.to}"
+
+    def __eq__(self, notation: str):
+        return str(self) == notation
 
