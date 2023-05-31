@@ -12,29 +12,52 @@ class Move:
     check: bool = False
 
     def __init__(
-        self, piece: Piece,
-        on: Coord, to: Coord,
+        self,
+        piece: None | Piece = None,
+        on: None | Coord = None,
+        to: None | Coord = None,
         en_passant: None | Coord = None,
         empty: bool | Coord = False,
-        new: bool | Piece = False,
+        extra: bool | tuple[Coord, Coord] = False,
+        promotion: bool | Piece = False,
         moved: bool = False,
-        notation: None | str = None
+        short_castle: bool = False,
+        long_castle: bool = False
     ):
         self.piece = piece
         self.on = on
         self.to = to
         self.en_passant = en_passant
         self.empty = empty
-        self.new = new
+        self.extra = extra
+        self.promotion = promotion
         self.moved = moved
-        self.notation = notation
+        self.short_castle = short_castle
+        self.long_castle = long_castle
+        self.buffer: None | Piece = None
         
     def __bool__(self):
         return True
 
-    def __str__(self):
-        return self.notation or f"{self.piece.notation}{self.on}{self.to}"
+    def notation(self):
+        if self.short_castle:
+            yield "0-0"
+            yield "O-O"
+        elif self.long_castle:
+            yield "0-0-0"
+            yield "O-O-O"
+        else:
+            for notation in (
+                f"{self.piece.notation}{self.on}{self.to}",
+                f"{self.piece.notation}{self.to}"
+            ):
+                if self.promotion:
+                    notation += self.promotion.notation
+                yield notation
 
-    def __eq__(self, notation: str):
-        return str(self) == notation
+    def __eq__(self, string: str):
+        for notation in self.notation():
+            if notation == string:
+                return True
+
 

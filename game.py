@@ -3,26 +3,16 @@ from piece import Piece, Pawn, Knight, Bishop, Rook, Queen, King, Slide
 from move import Move
 
 
-PIECES = {
-    Knight.notation: Knight,
-    Bishop.notation: Bishop,
-    Rook.notation: Rook,
-    Queen.notation: Queen,
-}
-
-
 class Game:
-    end = False
+    over = False
     board = tuple([Empty() for _ in range(8)] for _ in range(8))
-    backup: None | tuple = None
-    pep: None | Coord = None
+    history = [Move()]
     moves = []
     controls = []
     coords = tuple(Coord(x, y) for x in range(8) for y in range(8))
-    en_passant: None | Coord = None
-    result: str = ""
+    result: -1 | 0 | 1 = 0
 
-    def __init__(self, turn: WHITE | BLACK = WHITE):
+    def __init__(self, turn: BLACK | WHITE = WHITE):
         self.turn = turn
 
     def get(self, coord: Coord):
@@ -31,10 +21,10 @@ class Game:
     def king(self):
         for coord in self.coords:
             if (piece := self.get(coord)):
-                if piece.__class__ == King and self.turn == piece.side:       
+                if isinstance(piece, King) and self.turn == piece.side:       
                     return coord
 
-    def check(self):
+    def control(self):
         self.controls.clear()
 
         for coord in self.coords:
@@ -42,7 +32,7 @@ class Game:
                 if self.turn != piece.side:
                     for coord in piece.controls(coord): 
                         self.controls.append(coord)
-                                                                               
+                                                   
     def update(self):                                                          
         self.moves.clear()                                                     
 
@@ -51,74 +41,82 @@ class Game:
                 if self.turn == piece.side:
                     for move in piece.moves(coord):   
                         self.make(move)
-                        self.check()
+                        self.control()
                         if self.king() not in self.controls:
                             self.moves.append(move)
-                        self.undo()
+                        self.undo(move)
 
         if not self.moves:
+            self.control()
             if self.king() in self.controls:
-                self.result = f"{('Black', 'White')[not self.turn]} won"
+                self.result = -1 if self.turn else 1
             else:
-                self.result = "Draw"
-            self.end = True
+                self.result = 0
+            self.over = True
 
+    def undo(self, move: None | Move = None):
+        if not move and len(self.history) > 1:
+            move = self.history[-1]
 
-    def undo(self):
-        if self.backup:
-            self.board = self.backup
-            self.en_passant = self.pep
-            if self.lm.moved:
-                self.lm.piece.moved = False
+        if move:    
+            if move.promotion:
+                self.board[move.to.x][move.to.y] = Pawn(move.piece.side, self)
+            elif move.extra:
+                self.board[move.extra[0].x][move.extra[0].y] = self.get(
+                    move.extra[1]
+                )
+                self.board[move.extra[1].x][move.extra[1].y] = Empty()
+            elif move.empty:
+                self.board[move.empty.x][move.empty.y] = move.buffer
 
+            self.board[move.on.x][move.on.y] = self.get(move.to)
+            self.board[move.to.x][move.to.y] = move.buffer
+
+            if move.moved:
+                move.piece.moved = False
 
     def make(self, move: Move):
-        self.backup = tuple(i[:] for i in self.board)
-        self.pep = self.en_passant
-        self.lm = move
-
+        move.buffer = self.get(move.to)
         self.board[move.to.x][move.to.y] = self.get(move.on)
         self.board[move.on.x][move.on.y] = Empty()
-        if (new := move.new):
-            if isinstance(move.new, Coord):
-                self.board[move.new.x][move.new.y] = self.get(move.empty)
-            else:
-                self.board[move.to.x][move.to.y] = move.new(
-                    move.piece.side, self
-                )
-        if move.empty:
+
+        if move.promotion:
+            self.board[move.to.x][move.to.y] = move.promotion(
+                move.piece.side, self
+            )
+        elif move.extra:
+            self.board[move.extra[1].x][move.extra[1].y] = self.get(
+                move.extra[0]
+            )
+            self.board[move.extra[0].x][move.extra[0].y] = Empty()
+        elif move.empty:
+            move.buffer = self.get(move.empty)
             self.board[move.empty.x][move.empty.y] = Empty()
-        self.en_passant = move.en_passant
+
         if move.moved and not move.piece.moved:
             move.piece.moved = True
         else:
             move.moved = False
-
-    
+ 
     def move(self, string: str):
-        new = PIECES.get(string[-1])
-        if new:
-            string = string[:-1]
-
         moves = list(filter(lambda move: move == string, self.moves))
         if len(moves) == 1:
             move = moves[0]
-            if move.new and new:
-                move.new = new
-            if move.new is True:
-                return
-            if (
-                not move.new or move.new.__class__ == Coord
-                or issubclass(move.new, Piece) or issubclass(move.new, Slide)
-            ):
-                self.make(move)
-                self.turn = not self.turn
-                self.update()
-                    
+            self.make(move)
+            self.history.append(move)
+            self.turn = not self.turn
+            self.update()
+    
     def setup(self):
-        self.board = tuple([Empty() for _ in range(8)] for _ in range(8))
         self.end = False
-        self.result = ""
+        self.over = False
+        self.board = tuple([Empty() for _ in range(8)] for _ in range(8))
+        self.history = [Move()]
+        self.moves = []
+        self.controls = []
+        self.coords = tuple(Coord(x, y) for x in range(8) for y in range(8))
+        self.result = 0
+        self.turn = WHITE
 
         for rank, side in (7, BLACK), (0, WHITE):
             self.board[0][rank] = Rook(side, self)
@@ -133,8 +131,6 @@ class Game:
         for i in range(8):
             self.board[i][1] = Pawn(WHITE, self)
             self.board[i][6] = Pawn(BLACK, self)
-
-        self.turn = WHITE
 
         self.update()
 

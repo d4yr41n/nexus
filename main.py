@@ -4,6 +4,8 @@ from config import COLORS, CHARS
 from move import Move
 
 
+RESULTS = ("Draw", "White won", "Black won")
+
 game = Game()
 
 try:
@@ -21,18 +23,19 @@ try:
                     print(char, end=" ")
             print(f"  {y + 1}")
         print("\n    a b c d e f g h\n")
-        if game.end:
-            print(f"{game.result}\n")
-        if (action := input("> ")):
-            match action:
-                case "start" | "restart":
-                    game.setup()
-                case "exit":
-                    break
-                case "undo":
-                    game.undo()
-                case _:
-                    game.move(action)
+        if game.over:
+            print(f"{RESULTS[game.result]}\n")
+        print(*(notation for move in game.moves for notation in move.notation()))
+        match (action := input("> ")):
+            case "new":
+                game.setup()
+            case "exit":
+                break
+            case "undo":
+                game.undo()
+            case _:
+                game.move(action)
+
 except KeyboardInterrupt:
     print()
 

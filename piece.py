@@ -55,23 +55,25 @@ class Pawn(Piece):
             if (target := coord + vector):
                 piece = self.game.get(target)
                 if piece and self.side != piece.side:
-                    move = Move(self, coord, target)
                     if target.y == self.promotion:
-                        move.new = True
-                    yield move
+                        for piece in (Knight, Bishop, Rook, Queen):
+                            yield Move(self, coord, target, promotion=piece)
+                    else:
+                        yield Move(self, coord, target)
 
         if (target := coord + self.vector):
             if not self.game.get(target):
-                move = Move(self, coord, target)
                 if target.y == self.promotion:
-                    move.new = True
-                yield move
+                    for piece in (Knight, Bishop, Rook, Queen):
+                        yield Move(self, coord, target, promotion=piece)
+                else:
+                    yield Move(self, coord, target)
                 if coord.y == self.start:
                     target += self.vector
                     if not self.game.get(target):
                         yield Move(self, coord, target, target)
 
-        if (p := self.game.en_passant):
+        if (p := self.game.history[-1].en_passant):
             if coord.y == p.y and (coord.x - 1 == p.x or coord.x + 1 == p.x):
                 yield Move(
                     self, coord, p + self.vector, empty=self.game.en_passant
@@ -156,6 +158,7 @@ class King(Piece):
             move.moved = True
             yield move
 
+        self.game.control()
         if not self.moved and coord not in self.game.controls:
             rook = Coord(0, self.y)
             if not self.game.get(rook).moved:
@@ -168,8 +171,8 @@ class King(Piece):
                     target = Coord(2, self.y)
                     yield Move(
                         self, coord, target, 
-                        empty=rook, new=target-vector,
-                        notation="0-0-0", moved=True
+                        extra=(rook, target - vector),
+                        long_castle=True, moved=True
                     )
 
             rook = Coord(7, self.y)
@@ -183,7 +186,7 @@ class King(Piece):
                     target = Coord(6, self.y)
                     yield Move(
                         self, coord, target,
-                        empty=rook, new=target-vector,
-                        notation="0-0", moved=True
+                        extra=(rook, target - vector),
+                        short_castle=True, moved=True
                     )
 
