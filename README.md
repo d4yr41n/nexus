@@ -1,3 +1,5 @@
+The code is shitty. Will fix it later.
+
 Tasks:
 1. Refactoring
 2. Bugfixing
