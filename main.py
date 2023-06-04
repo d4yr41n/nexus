@@ -1,6 +1,10 @@
+from os import system
+
 from const import RESULTS
 from game import Game
 
+
+system("")
 
 game = Game()
 

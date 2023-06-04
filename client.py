@@ -1,8 +1,11 @@
+from os import system
 from time import sleep
 from urllib.request import Request, urlopen
 
 from const import BLACK, WHITE, RESULTS
 
+
+system("")
 
 url = "https://nexus-ubsn.onrender.com"
 
