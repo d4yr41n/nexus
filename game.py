@@ -1,97 +1,114 @@
-from const import BLACK, WHITE, Empty, Coord
+from const import EMPTY, BLACK, WHITE
+from config import CHARS, COLORS
 from piece import Piece, Pawn, Knight, Bishop, Rook, Queen, King, Slide
 from move import Move
 
 
 class Game:
-    over = False
-    board = tuple([Empty() for _ in range(8)] for _ in range(8))
-    history = [Move()]
+    squares = tuple(i + j for i in range(21, 92, 10) for j in range(1, 9))
+    board: list
+    turn: BLACK | WHITE
     moves = []
-    controls = []
-    coords = tuple(Coord(x, y) for x in range(8) for y in range(8))
-    result: -1 | 0 | 1 = 0
+    history = []
+    over: bool
+    run: bool = False
+    result: -1 | 0 | 1
 
-    def __init__(self, turn: BLACK | WHITE = WHITE):
-        self.turn = turn
+    def __init__(self):
+        self.reset()
 
-    def get(self, coord: Coord):
-        return self.board[coord.x][coord.y]
+    def __str__(self):
+        output = "    a b c d e f g h\n\n"
+        for y in range(91, 20, -10):
+            output += f"{(y - 11) // 10}   "
+            for x in range(1, 9):
+                piece = self.board[y + x]
+                char = CHARS[piece]
+                if piece:
+                    output += f"{COLORS[piece.side]}{char}\033[0m "
+                else:
+                    output += f"{char} "
+            output += f"  {(y - 11) // 10}\n"
+        output += "\n    a b c d e f g h\n"
+        return output
 
-    def king(self):
-        for coord in self.coords:
-            if (piece := self.get(coord)):
-                if isinstance(piece, King) and self.turn == piece.side:       
-                    return coord
+
+    def reset(self):
+        self.board = [
+            EMPTY if square in self.squares else None for square in range(120)
+        ]
+        self.turn = WHITE
+        self.moves.clear()
+        self.history.clear()
+        self.over = False
+        self.result = 0
 
     def control(self):
-        self.controls.clear()
-
-        for coord in self.coords:
-            if (piece := self.get(coord)):
+        for square in self.squares:
+            if (piece := self.board[square]):
                 if self.turn != piece.side:
-                    for coord in piece.controls(coord): 
-                        self.controls.append(coord)
-                                                   
-    def update(self):                                                          
-        self.moves.clear()                                                     
+                    yield from piece.control(square)
 
-        for coord in self.coords:
-            if (piece := self.get(coord)):
+    def king(self):
+        for square in self.squares:
+            if (piece := self.board[square]):
+                if isinstance(piece, King) and self.turn == piece.side:
+                    return square
+
+    def update(self):
+        self.moves.clear()
+
+        for square in self.squares:
+            if (piece := self.board[square]):
                 if self.turn == piece.side:
-                    for move in piece.moves(coord):   
+                    for move in piece.moves(square):
                         self.make(move)
-                        self.control()
-                        if self.king() not in self.controls:
+                              
+                        if self.king() not in self.control():
                             self.moves.append(move)
+
                         self.undo(move)
 
         if not self.moves:
-            self.control()
-            if self.king() in self.controls:
+            if self.king() in self.control():
                 self.result = -1 if self.turn else 1
             else:
                 self.result = 0
             self.over = True
 
-    def undo(self, move: None | Move = None):
-        if not move and len(self.history) > 1:
-            move = self.history[-1]
+    def cancel():
+        if self.history:
+            self.undo(self.history[-1])
+            self.update()
 
-        if move:    
-            if move.promotion:
-                self.board[move.to.x][move.to.y] = Pawn(move.piece.side, self)
-            elif move.extra:
-                self.board[move.extra[0].x][move.extra[0].y] = self.get(
-                    move.extra[1]
-                )
-                self.board[move.extra[1].x][move.extra[1].y] = Empty()
-            elif move.empty:
-                self.board[move.empty.x][move.empty.y] = move.buffer
+    def undo(self, move: Move):
+        if move.promotion:
+            self.board[move.target] = Pawn(move.piece.side, self)
+        elif move.extra:
+            self.board[move.extra[0]] = self.board[move.extra[1]]
+            self.board[move.extra[1]] = EMPTY
+        elif move.empty:
+            self.board[move.empty] = move.buffer
 
-            self.board[move.on.x][move.on.y] = self.get(move.to)
-            self.board[move.to.x][move.to.y] = move.buffer
+        self.board[move.square] = self.board[move.target]
+        self.board[move.target] = move.buffer
 
-            if move.moved:
-                move.piece.moved = False
+        if move.moved:
+            move.piece.moved = False
 
     def make(self, move: Move):
-        move.buffer = self.get(move.to)
-        self.board[move.to.x][move.to.y] = self.get(move.on)
-        self.board[move.on.x][move.on.y] = Empty()
+        move.buffer = self.board[move.target]
+        self.board[move.target] = self.board[move.square]
+        self.board[move.square] = EMPTY
 
         if move.promotion:
-            self.board[move.to.x][move.to.y] = move.promotion(
-                move.piece.side, self
-            )
+            self.board[move.target] = move.promotion(move.piece.side, self)
         elif move.extra:
-            self.board[move.extra[1].x][move.extra[1].y] = self.get(
-                move.extra[0]
-            )
-            self.board[move.extra[0].x][move.extra[0].y] = Empty()
+            self.board[move.extra[1]] = self.board[move.extra[0]]
+            self.board[move.extra[0]] = EMPTY
         elif move.empty:
-            move.buffer = self.get(move.empty)
-            self.board[move.empty.x][move.empty.y] = Empty()
+            move.buffer = self.board[move.empty]
+            self.board[move.empty] = EMPTY
 
         if move.moved and not move.piece.moved:
             move.piece.moved = True
@@ -108,29 +125,22 @@ class Game:
             self.update()
     
     def setup(self):
-        self.end = False
-        self.over = False
-        self.board = tuple([Empty() for _ in range(8)] for _ in range(8))
-        self.history = [Move()]
-        self.moves = []
-        self.controls = []
-        self.coords = tuple(Coord(x, y) for x in range(8) for y in range(8))
-        self.result = 0
-        self.turn = WHITE
+        self.reset()
+        self.run = True
 
-        for rank, side in (7, BLACK), (0, WHITE):
-            self.board[0][rank] = Rook(side, self)
-            self.board[1][rank] = Knight(side, self)
-            self.board[2][rank] = Bishop(side, self)
-            self.board[3][rank] = Queen(side, self)
-            self.board[4][rank] = King(side, self)
-            self.board[5][rank] = Bishop(side, self)
-            self.board[6][rank] = Knight(side, self)
-            self.board[7][rank] = Rook(side, self)
+        for square, side in (92, BLACK), (22, WHITE):
+            self.board[square] = Rook(side, self)
+            self.board[square + 1] = Knight(side, self)
+            self.board[square + 2] = Bishop(side, self)
+            self.board[square + 3] = Queen(side, self)
+            self.board[square + 4] = King(side, self)
+            self.board[square + 5] = Bishop(side, self)
+            self.board[square + 6] = Knight(side, self)
+            self.board[square + 7] = Rook(side, self)
 
-        for i in range(8):
-            self.board[i][1] = Pawn(WHITE, self)
-            self.board[i][6] = Pawn(BLACK, self)
+        for square in range(8):
+            self.board[square + 32] = Pawn(WHITE, self)
+            self.board[square + 82] = Pawn(BLACK, self)
 
         self.update()
 

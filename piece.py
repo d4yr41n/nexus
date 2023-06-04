@@ -2,191 +2,172 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from const import BLACK, WHITE, Empty, Coord
+from const import BLACK, WHITE
 from move import Move
 
 if TYPE_CHECKING:
     from game import Game
 
 
-class Piece(Empty):
-    movement: tuple[Coord]
+class Piece:
+    code: int
+    offsets: tuple[int]
     notation: str
+    value: int
+
+    def __index__(self):
+        return self.code
 
     def __init__(self, side: WHITE | BLACK, game: Game):
         self.side = side
         self.game = game
 
-    def __bool__(self):
-        return True
+    def control(self, square: int):
+        for offset in self.offsets:
+            offset += square
+            if self.game.board[offset] != None:
+                yield offset
 
-    def moves(self, coord):
-        for vector in self.movement:
-            if (target := coord + vector):
-                piece = self.game.get(target)
-                if not piece or self.side != piece.side:
-                    yield Move(self, coord, target)
-
-    def controls(self, coord):
-        for vector in self.movement:
-            if (target := coord + vector):
-                yield target
+    def moves(self, square: int):
+        for target in self.control(square):
+            piece = self.game.board[target]
+            if not piece or self.side != piece.side:
+                yield Move(self, square, target)
 
 
 class Pawn(Piece):
-    index = 1
+    code = 1
     notation = ""
+    value = 1
 
-    def __init__(self, side: WHITE | BLACK, game: Game):
+    def __init__(self, side: BLACK | WHITE, game: Game):
         super().__init__(side, game)
         if side:
-            self.vector = Coord(0, 1)
-            self.start = 1
-            self.promotion = 7
-            self.capture = Coord(-1, 1), Coord(1, 1)
+            self.start = 3
+            self.promotion = 9
+            self.offset = 10
+            self.offsets = 11, 9
         else:
-            self.vector = Coord(0, -1)
-            self.start = 6
-            self.promotion = 0
-            self.capture = Coord(1, -1), Coord(1, -1)
+            self.start = 8
+            self.promotion = 2
+            self.offset = -10
+            self.offsets = -11, 9
 
-    def moves(self, coord: Coord):
-        for vector in self.capture:
-            if (target := coord + vector):
-                piece = self.game.get(target)
-                if piece and self.side != piece.side:
-                    if target.y == self.promotion:
-                        for piece in (Knight, Bishop, Rook, Queen):
-                            yield Move(self, coord, target, promotion=piece)
-                    else:
-                        yield Move(self, coord, target)
-
-        if (target := coord + self.vector):
-            if not self.game.get(target):
-                if target.y == self.promotion:
+    def moves(self, square: int):
+        for target in self.control(square):
+            piece = self.game.board[target]
+            if piece and self.side != piece.side:
+                if target // 10 == self.promotion:
                     for piece in (Knight, Bishop, Rook, Queen):
-                        yield Move(self, coord, target, promotion=piece)
+                        yield Move(self, square, target, promotion=piece)
                 else:
-                    yield Move(self, coord, target)
-                if coord.y == self.start:
-                    target += self.vector
-                    if not self.game.get(target):
-                        yield Move(self, coord, target, target)
+                    yield Move(self, square, target)
 
-        if (p := self.game.history[-1].en_passant):
-            if coord.y == p.y and (coord.x - 1 == p.x or coord.x + 1 == p.x):
+        target = square + self.offset
+        if not self.game.board[target]:
+            if target // 10 == self.promotion:
+                for piece in (Knight, Bishop, Rook, Queen):
+                    yield Move(self, square, target, promotion=piece)
+            else:
+                yield Move(self, square, target)
+            
+            if square // 10 == self.start:
+                target += self.offset
+                if not self.game.board[target]:
+                    yield Move(self, square, target, en_passant=target)
+
+        if self.game.history and (
+            en_passant := self.game.history[-1].en_passant
+        ):
+            if square - 1 <= en_passant <= square + 1:
                 yield Move(
-                    self, coord, p + self.vector, empty=self.game.en_passant
+                    self, square, en_passant + self.offset,
+                    empty=self.en_passant
                 )
-
-    def controls(self, coord):
-        for vector in self.capture:
-            if (target := coord + vector):
-                yield target
 
 
 class Knight(Piece):
-    movement = (
-        Coord(2, 1), Coord(1, 2), Coord(-1, 2), Coord(-2, 1),
-        Coord(-2, -1), Coord(-1, -2), Coord(1, -2), Coord(2, -1)
-    )
-    index = 2
+    code = 2
+    offsets = 12, 21, 19, 8, -12, -21, -19, -8
     notation = "N"
 
 
 class Slide(Piece):
-    def moves(self, coord):
-        for vector in self.movement:
+    def control(self, square: int):
+        for offset in self.offsets:
             for factor in range(1, 8):
-                if (target := coord + vector * factor):
-                    if (piece := self.game.get(target)):
-                        if self.side != piece.side:
-                            yield Move(self, coord, target)
-                        break
-                    yield Move(self, coord, target)
+                target = square + offset * factor
+                if self.game.board[target] == None:
+                    break
+                yield target
+                if self.game.board[target]:
+                    break
 
-    def controls(self, coord):
-        for vector in self.movement:
-            for factor in range(1, 8):
-                if (target := coord + vector * factor):
-                    yield target
-                    if self.game.get(target):
-                        break
+    def moves(self, square: int):
+        for target in self.control(square):
+            if (piece := self.game.board[target]):
+                if self.side != piece.side:
+                    yield Move(self, square, target)
+            else:
+                yield Move(self, square, target)
 
 
 class Bishop(Slide):
-    movement = Coord(1, 1), Coord(-1, 1), Coord(-1, -1), Coord(1, -1) 
-    index = 3
+    code = 3
+    offsets = 11, 9, -11, -9
     notation = "B"
 
 
 class Rook(Slide):
     moved: bool = False
-    movement = Coord(0, 1), Coord(1, 0), Coord(-1, 0), Coord(0, -1)
-    index = 4
+    code = 4
+    offsets = 1, 10, -1, -10
     notation = "R"
 
 
-
 class Queen(Slide):
-    movement = (
-        Coord(0, 1), Coord(1, 1), Coord(1, 0), Coord(-1, 1),
-        Coord(-1, 0), Coord(-1, -1), Coord(0, -1), Coord(1, -1)
-    )
-    index = 5
+    code = 5
+    offsets = 1, 11, 10, 9, -1, -11, -10, -9
     notation = "Q"
 
 
 class King(Piece):
     moved: bool = False
-    movement = (
-        Coord(0, 1), Coord(1, 1), Coord(1, 0), Coord(-1, 1),
-        Coord(-1, 0), Coord(-1, -1), Coord(0, -1), Coord(1, -1)
-    )
-    index = 6
+    code = 6
+    offsets = 1, 11, 10, 9, -1, -11, -10, -9
     notation = "K"
 
-    def __init__(self, side: BLACK | WHITE, game: Game):
-        super().__init__(side, game)
-        if side:
-            self.y = 0
-        else:
-            self.y = 7
+    def moves(self, square: int):
+        for target in self.control(square):
+            piece = self.game.board[target]
+            if not piece or self.side != piece.side:
+                yield Move(self, square, target, moved=True)
 
-    def moves(self, coord: Coord):
-        for move in super().moves(coord):
-            move.moved = True
-            yield move
-
-        self.game.control()
-        if not self.moved and coord not in self.game.controls:
-            rook = Coord(0, self.y)
-            if not self.game.get(rook).moved:
-                vector = Coord(-1, 0)
+        control = tuple(self.game.control())
+        if not self.moved and square not in control:
+            rook = square - 4
+            if self.game.board[rook] and not self.game.board[rook].moved:
                 for factor in range(1, 4):
-                    square = coord + vector * factor
-                    if self.game.get(square) or square in self.game.controls:
+                    check = square - factor
+                    if self.game.board[check] or check in control:
                         break
                 else:
-                    target = Coord(2, self.y)
                     yield Move(
-                        self, coord, target, 
-                        extra=(rook, target - vector),
-                        long_castle=True, moved=True
+                        self, square, square - 2, 
+                        extra=(rook, rook + 3),
+                        queen_castling=True, moved=True
                     )
 
-            rook = Coord(7, self.y)
-            if not self.game.get(rook).moved:
-                vector = Coord(1, 0)
+            rook = square + 3
+            if self.game.board[rook] and not self.game.board[rook].moved:
                 for factor in range(1, 3):
-                    square = coord + vector * factor
-                    if self.game.get(square) or square in self.game.controls:
+                    check = square + factor
+                    if self.game.board[check] or check in control:
                         break
                 else:
-                    target = Coord(6, self.y)
                     yield Move(
-                        self, coord, target,
-                        extra=(rook, target - vector),
-                        short_castle=True, moved=True
+                        self, square, square + 2,
+                        extra=(rook, rook - 2),
+                        king_castling=True, moved=True
                     )
 
