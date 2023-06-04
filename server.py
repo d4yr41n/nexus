@@ -4,43 +4,43 @@ from const import BLACK, WHITE
 from game import Game
 
 
-game = Game()
+games = [Game()]
 
 
 class RequestHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         self.send_response(200)
         self.end_headers()
-        match self.path:
-            case "/":
-                self.wfile.write(str(game).encode("utf-8"))
-            case "/run":
-                self.write.write(str(game.run).encode("utf-8"))
-            case "/turn":
-                print(game.turn)
-                self.wfile.write(str(game.turn).encode("utf-8"))
+        if self.path == "/":
+            response = games[0]
+        elif self.path == "/turn":
+            response = int(games[0].turn)
+        elif self.path == "/over":
+            response = int(games[0].over)
+        elif self.path == "/result":
+            response = games[0].result
+        else:
+            return
 
+        self.wfile.write(str(response).encode("utf-8"))
 
     def do_POST(self):
         self.send_response(200)
         self.end_headers()
-        match self.path:
-            case "/":
-                game.setup()
-            case "/black":
-                if game.turn == BLACK:
-                    game.move(
-                        self.rfile.read(
-                            int(self.headers['Content-Length'])
-                        ).decode("utf-8")
-                    )
-            case "/white":
-                if game.turn == WHITE:
-                    game.move(
-                        self.rfile.read(
-                            int(self.headers['Content-Length'])
-                        ).decode("utf-8")
-                    )
+        if self.path == "/":    
+            games[0] = Game()
+        elif self.path == "/black" and games[0].turn == BLACK:
+            games[0].move(
+                self.rfile.read(
+                    int(self.headers['Content-Length'])
+                ).decode("utf-8")
+            )
+        elif self.path == "/white" and games[0].turn == WHITE:
+            games[0].move(
+                self.rfile.read(
+                    int(self.headers['Content-Length'])
+                ).decode("utf-8") 
+            )
 
 
 HTTPServer(("", 8000), RequestHandler).serve_forever()

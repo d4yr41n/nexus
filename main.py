@@ -1,10 +1,6 @@
-from game import BLACK, WHITE, Game
-from piece import Pawn, Knight, Bishop
-from config import COLORS, CHARS
-from move import Move
+from const import RESULTS
+from game import Game
 
-
-RESULTS = ("Draw", "White won", "Black won")
 
 game = Game()
 
@@ -18,11 +14,11 @@ try:
 
         match (action := input("> ")):
             case "new":
-                game.setup()
+                game = Game()
             case "exit":
                 break
-            case "undo":
-                game.undo()
+            case "cancel":
+                game.cancel()
             case _:
                 game.move(action)
 

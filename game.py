@@ -1,21 +1,37 @@
-from const import EMPTY, BLACK, WHITE
+from const import EMPTY, BLACK, WHITE, SQUARES
 from config import CHARS, COLORS
 from piece import Piece, Pawn, Knight, Bishop, Rook, Queen, King, Slide
 from move import Move
 
 
 class Game:
-    squares = tuple(i + j for i in range(21, 92, 10) for j in range(1, 9))
     board: list
-    turn: BLACK | WHITE
+    turn: BLACK | WHITE = WHITE
     moves = []
     history = []
-    over: bool
-    run: bool = False
-    result: -1 | 0 | 1
+    over: bool = False
+    result: -1 | 0 | 1 = 0
 
     def __init__(self):
-        self.reset()
+        self.board = [
+            EMPTY if square in SQUARES else None for square in range(120)
+        ]
+
+        for square, side in (92, BLACK), (22, WHITE):
+            self.board[square] = Rook(side, self)
+            self.board[square + 1] = Knight(side, self)
+            self.board[square + 2] = Bishop(side, self)
+            self.board[square + 3] = Queen(side, self)
+            self.board[square + 4] = King(side, self)
+            self.board[square + 5] = Bishop(side, self)
+            self.board[square + 6] = Knight(side, self)
+            self.board[square + 7] = Rook(side, self)
+
+        for square in range(8):
+            self.board[square + 32] = Pawn(WHITE, self)
+            self.board[square + 82] = Pawn(BLACK, self)
+
+        self.update()
 
     def __str__(self):
         output = "    a b c d e f g h\n\n"
@@ -32,25 +48,14 @@ class Game:
         output += "\n    a b c d e f g h\n"
         return output
 
-
-    def reset(self):
-        self.board = [
-            EMPTY if square in self.squares else None for square in range(120)
-        ]
-        self.turn = WHITE
-        self.moves.clear()
-        self.history.clear()
-        self.over = False
-        self.result = 0
-
     def control(self):
-        for square in self.squares:
+        for square in SQUARES:
             if (piece := self.board[square]):
                 if self.turn != piece.side:
                     yield from piece.control(square)
 
     def king(self):
-        for square in self.squares:
+        for square in SQUARES:
             if (piece := self.board[square]):
                 if isinstance(piece, King) and self.turn == piece.side:
                     return square
@@ -58,7 +63,7 @@ class Game:
     def update(self):
         self.moves.clear()
 
-        for square in self.squares:
+        for square in SQUARES:
             if (piece := self.board[square]):
                 if self.turn == piece.side:
                     for move in piece.moves(square):
@@ -123,24 +128,4 @@ class Game:
             self.history.append(move)
             self.turn = not self.turn
             self.update()
-    
-    def setup(self):
-        self.reset()
-        self.run = True
-
-        for square, side in (92, BLACK), (22, WHITE):
-            self.board[square] = Rook(side, self)
-            self.board[square + 1] = Knight(side, self)
-            self.board[square + 2] = Bishop(side, self)
-            self.board[square + 3] = Queen(side, self)
-            self.board[square + 4] = King(side, self)
-            self.board[square + 5] = Bishop(side, self)
-            self.board[square + 6] = Knight(side, self)
-            self.board[square + 7] = Rook(side, self)
-
-        for square in range(8):
-            self.board[square + 32] = Pawn(WHITE, self)
-            self.board[square + 82] = Pawn(BLACK, self)
-
-        self.update()
-
+ 
