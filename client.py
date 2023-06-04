@@ -4,7 +4,7 @@ from urllib.request import Request, urlopen
 from const import BLACK, WHITE, RESULTS
 
 
-url = "http://127.0.0.1:8000"
+url = "https://nexus-ubsn.onrender.com"
 
 urlopen(Request(url, method="POST"))
 
