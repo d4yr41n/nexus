@@ -12,15 +12,15 @@ try:
         if game.over:
             print(f"{RESULTS[game.result]}\n")
 
-        match (action := input("> ")):
-            case "new":
-                game = Game()
-            case "exit":
-                break
-            case "cancel":
-                game.cancel()
-            case _:
-                game.move(action)
+        action = input("> ")
+        if action == "new":
+            game = Game()
+        elif action == "exit":
+            break
+        elif action == "cancel":
+            game.cancel()
+        else:
+            game.move(action)
 
 except KeyboardInterrupt:
     print()
