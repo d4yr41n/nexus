@@ -1,4 +1,6 @@
-Tasks:
-1. Online
-2. AI
+Single:
+main.py
 
+Online:
+client.py
+server.py
