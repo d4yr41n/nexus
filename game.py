@@ -81,9 +81,10 @@ class Game:
                 self.result = 0
             self.over = True
 
-    def cancel():
+    def cancel(self):
         if self.history:
             self.undo(self.history[-1])
+            self.turn = not self.turn
             self.update()
 
     def undo(self, move: Move):

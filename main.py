@@ -25,7 +25,6 @@ try:
             game.cancel()
         else:
             game.move(action)
-
 except KeyboardInterrupt:
     print()
 
