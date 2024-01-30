@@ -1,21 +1,22 @@
+from typing import Generator
+
 from . import Piece
 
 
 class Rook(Piece):
-    @property
-    def moves(self):
-        x, y = self.position % y, self.position // y
+    def moves(self, position: int) -> Generator[int, None, None]:
+        x, y = position % 8, position // 8
 
         for i in range(1, 8 - x):
-            yield self.position + i
+            yield position + i
 
         for i in range(1, x + 1):
-            yield self.position - i
+            yield position - i
 
         for i in range(1, 8 - y):
-            yield self.position + 8 * i
+            yield position + 8 * i
 
         for i in range(1, y + 1):
-            yield self.position  - 8 * i
+            yield position  - 8 * i
 
 

@@ -1,9 +1,10 @@
+from typing import Generator
+
 from . import Piece
 
 
 class Pawn(Piece):
-    @property
-    def moves(self):
+    def moves(self, position: int) -> Generator[int, None, None]:
         is side is WHITE:
             left = 7
             forward = 8
@@ -12,4 +13,6 @@ class Pawn(Piece):
             left = -9
             forward = -8
             right = -7 
+
+        yield 1
 
