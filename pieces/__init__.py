@@ -1,10 +1,8 @@
-from typing import Generator
-
-
-class Piece:
-    def __init__(self, side: bool) -> None:
-        self.side = side
-
-    def moves(self, position: int) -> Generator[int, None, None]: 
-        raise NotImplementedError
+from .bishop import Bishop
+from .king import King
+from .knight import Knight
+from .pawn import Pawn
+from .piece import Piece
+from .rook import Rook
+from .queen import Queen
 

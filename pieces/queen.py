@@ -1,6 +1,6 @@
 from typing import Generator
 
-from . import Piece
+from .piece import Piece
 from .bishop import Bishop
 from .rook import Rook
 

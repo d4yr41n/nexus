@@ -1,18 +1,19 @@
 from typing import Generator
 
-from . import Piece
+from .piece import Piece
+from ..moves import Move
 
 
 class Pawn(Piece):
-    def moves(self, position: int) -> Generator[int, None, None]:
-        is side is WHITE:
-            left = 7
-            forward = 8
-            right = 9
-        elif side is BLACK:
-            left = -9
-            forward = -8
-            right = -7 
-
-        yield 1
+    def moves(self, position: int) -> Generator[Move, None, None]:
+        if self.side:
+            yield Move(self, position, position + 7)
+            yield Move(self, position, position + 8)
+            yield Move(self, position, position + 16)
+            yield Move(self, position, position + 9)
+        else:
+            yield Move(self, position, position - 7)
+            yield Move(self, position, position - 8)
+            yield Move(self, position, position - 16)
+            yield Move(self, position, position - 9)
 
