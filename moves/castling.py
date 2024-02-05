@@ -29,6 +29,7 @@ class Castling(AbstractMove):
             game.board[self.king] = None
             game.board[self.rook + 3] = game.board[self.rook]
             game.board[self.rook] = None
+        game.castling = game.castling.replace(("kq", "KQ")[self.side], '')
         super().apply(game)
 
     def cancel(self, game: Game): 
@@ -43,4 +44,6 @@ class Castling(AbstractMove):
             game.board[self.king - 2] = None
             game.board[self.rook] = game.board[self.rook + 3]
             game.board[self.rook] = None
+
+        game.castling = sorted(game.castling + "kq", "KQ")[self.side])
 
