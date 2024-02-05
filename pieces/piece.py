@@ -2,13 +2,15 @@ from __future__ import annotations
 from collections.abc import Generator
 from typing import TYPE_CHECKING
 
-from ..moves import AbstractMove
+from ..empty import Empty
+from ..moves import AbstractMove, Move
 
 if TYPE_CHECKING:
     from ..game import Game
 
 
-class Piece:
+class Piece(Empty):
+    char: str
     repr: tuple[str, str]
 
     def __init__(self, side: bool) -> None:
@@ -17,12 +19,15 @@ class Piece:
     def __repr__(self) -> str:
         return self.repr[self.side]
 
-    def pin(self, position: int, game: Game):
-        x, y = position % 8, position // 8
+    def __bool__(self) -> bool:
+        return True
 
-        right, forward, left, backward = (False,) * 4
-
-
-    def moves(self, position: int, game: Game) -> Generator[AbstractMove, None, None]: 
+    def handles(self, game: Game, position: int) -> Generator[int, None, None]: 
         raise NotImplementedError
+
+    def moves(self, game: Game, position: int) -> Generator[AbstractMove, None, None]: 
+        for i in self.handles(game, position):
+            if (piece := game.board[i]) and piece.side is self.side:
+                continue
+            yield Move(self, position, i)
 

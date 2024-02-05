@@ -1,29 +1,22 @@
-from collections.abc import Generator
+from typing import TYPE_CHECKING
 
-from .piece import Piece
+from .sliding_piece import SlidingPiece
 from ..moves import Move
 
+if TYPE_CHECKING:
+    from ..game import Game
 
-class Bishop(Piece):
-    def handles(self, position, game):
+
+class Bishop(SlidingPiece):
+    char = 'B'
+    repr = 'b', 'B'
+
+    def lines(self, position: int) -> tuple[range, ...]:
         x, y = position % 8, position // 8
-
-        yield from range(position + 9, position + min(7 - x, 7 - y) * 9)
-        yield from range(position + 7, position + min(x, y)):
-        yield from range(position - 9, position + min(7 - x, 7 - y) * 9)
-
-
-    def moves(self, position: int) -> Generator[Move, None, None]:
-        x, y = position % 8, position // 8
-
-            yield Move(self, position, position + 9 * i)
-
-        for i in range(1, 8 - max(x, y)):
-            yield Move(self, position, position + 7 * i)
-
-        for i in range(1, max(x, y) + 1):
-            yield Move(self, position, position - 9 * i)
-
-        for i in range(1, min(x, y) + 1):
-            yield Move(self, position, position - 7 * i)
+        return (
+            range(position + 9, position + min(7 - x, 7 - y) * 9 + 1, 9),
+            range(position + 7, position + min(x, 7 - y) * 7 + 1, 7),
+            range(position - 9, position - min(x, y) * 9 - 1, -9),
+            range(position - 7, position - min(7 - x, y) * 7 - 1, -7)
+        )
 

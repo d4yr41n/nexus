@@ -1,22 +1,22 @@
-from typing import Generator
+from typing import TYPE_CHECKING
 
-from .piece import Piece
+from .sliding_piece import SlidingPiece
+from ..moves import Move
+
+if TYPE_CHECKING:
+    from ..game import Game
 
 
-class Rook(Piece):
-    def moves(self, position: int) -> Generator[int, None, None]:
+class Rook(SlidingPiece):
+    char = 'R'
+    repr = 'r', 'R'
+
+    def lines(self, position: int) -> tuple[range, ...]:
         x, y = position % 8, position // 8
-
-        for i in range(1, 8 - x):
-            yield position + i
-
-        for i in range(1, x + 1):
-            yield position - i
-
-        for i in range(1, 8 - y):
-            yield position + 8 * i
-
-        for i in range(1, y + 1):
-            yield position  - 8 * i
-
+        return (
+            range(position + 1, (y + 1) * 8),
+            range(position + 8, 57 + x, 8),
+            range(position - 1, y * 8 - 1, -1),
+            range(position - 8, x, -8),
+        )
 

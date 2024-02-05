@@ -1,19 +1,28 @@
-from typing import Generator
+from collections.abc import Generator
 
 from .piece import Piece
-from ..moves import Move
-
+from ..moves import AbstractMove, Move, DoubleForward
 
 class Pawn(Piece):
-    def moves(self, position: int) -> Generator[Move, None, None]:
+    char = ''
+    repr = 'p', 'P'
+
+    def handles(self, game, position):
         if self.side:
-            yield Move(self, position, position + 7)
-            yield Move(self, position, position + 8)
-            yield Move(self, position, position + 16)
-            yield Move(self, position, position + 9)
+            yield position + 9
+            yield position + 7
         else:
-            yield Move(self, position, position - 7)
-            yield Move(self, position, position - 8)
-            yield Move(self, position, position - 16)
-            yield Move(self, position, position - 9)
+            yield position + 7
+            yield position + 9
+
+
+    def moves(self, game, position: int) -> Generator[AbstractMove, None, None]:
+        yield from super().moves(game, position)
+
+        forward = position + 8
+        if not game.board[forward]:
+            yield Move(self, position, forward)
+            double = forward + 8
+            if not game.board[forward]:
+                yield DoubleForward(self, position, double, forward)
 
