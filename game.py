@@ -7,13 +7,17 @@ class Game:
     board: list[Piece | Empty] = [Empty()] * 64
     record = []
     en_passant: int | None = None
-    castling = "KQkq"
+    castling: str = "KQkq"
 
     def setup(self) -> None:
         self.board[1] = Bishop(True)
 
-    @property
-    def moves(self):
+    def update(self):
+        for i in range(64):
+            if (piece := self.board[i]):
+                for j in piece.handles(self, i):
+                    self.board[j].handers[piece.side].append(i)
+
         for i in range(64):
             if (piece := self.board[i]):
                 yield from piece.moves(self, i)
