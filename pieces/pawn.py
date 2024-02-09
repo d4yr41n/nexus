@@ -9,20 +9,37 @@ class Pawn(Piece):
 
     def handles(self, game, position):
         if self.side:
-            yield position + 9
-            yield position + 7
+            s = position + 9
+            if game.board[s]:
+                yield s
+            s = position + 7
+            if game.board[s]:
+                yield s
         else:
-            yield position + 7
-            yield position + 9
+            s = position - 7
+            if game.board[s]:
+                yield s
+            s = position - 9
+            if game.board[s]:
+                yield s
 
 
     def moves(self, game, position: int) -> Generator[AbstractMove, None, None]:
         yield from super().moves(game, position)
 
-        forward = position + 8
-        if not game.board[forward]:
-            yield Move(self, position, forward)
-            double = forward + 8
+        if self.side:
+            forward = position + 8
             if not game.board[forward]:
-                yield DoubleForward(self, position, double, forward)
+                yield Move(self, position, forward)
+                double = forward + 8
+                if position // 8 == 1 and not game.board[double]:
+                    yield DoubleForward(self, position, double, forward)
+        else:
+            forward = position - 8
+            if not game.board[forward]:
+                yield Move(self, position, forward)
+                double = forward - 8
+                if position // 8 == 6 and not game.board[double]:
+                    yield DoubleForward(self, position, double, forward)
+
 

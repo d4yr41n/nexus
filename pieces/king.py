@@ -14,8 +14,23 @@ class King(Piece):
     repr = 'k', 'K'
 
     def handles(self, game: Game, position: int) -> Generator[int, None, None]:
-        for i in (1, 9, 8, 7, -1, -9, -8, -7):
-            yield position + i
+        x, y = position % 8, position // 8
+        if x < 7:
+            yield position + 1
+        if x > 0:
+            yield position - 1
+        if y < 7:
+            yield position + 8
+        if y > 0:
+            yield position - 8
+        if x < 7 and y < 7:
+            yield position + 9
+        if x > 0 and y < 7:
+            yield position + 7
+        if x < 7 and y > 0:
+            yield position - 7
+        if x > 0 and y > 0:
+            yield position - 9
 
     def moves(self, game: Game, position: int) -> Generator[Move | Castling, None, None]:
         for i in self.handles(game, position):

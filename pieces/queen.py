@@ -7,5 +7,4 @@ class Queen(Bishop, Rook):
     repr = 'q', 'Q'
 
     def lines(self, position: int) -> tuple[range, ...]:
-        return super(Bishop).lines(position) + super(Rook).lines(position)
-
+        return super(Bishop, self).lines(position) + super(Rook, self).lines(position)

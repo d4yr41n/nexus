@@ -1,4 +1,5 @@
 from __future__ import annotations
+from collections.abc import Generator
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -9,6 +10,9 @@ class AbstractMove:
     en_passant: int | None = None
 
     def __repr__(self) -> str:
+        raise NotImplementedError
+
+    def notation(self) -> Generator[str, None, None]:
         raise NotImplementedError
 
     def apply(self, game: Game) -> None:

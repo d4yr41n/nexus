@@ -27,7 +27,6 @@ class Piece(Empty):
 
     def moves(self, game: Game, position: int) -> Generator[AbstractMove, None, None]: 
         for i in self.handles(game, position):
-            if (piece := game.board[i]) and piece.side is self.side:
-                continue
-            yield Move(self, position, i)
+            if not (piece := game.board[i]) or piece.side is not self.side:
+                yield Move(self, position, i)
 

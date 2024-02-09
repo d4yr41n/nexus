@@ -11,6 +11,13 @@ if TYPE_CHECKING:
 class Promotion(Move):
     buffer: Piece | None = None
 
+    def __repr__(self) -> str:
+        return super().__repr__() + self.buffer
+
+    def notation(self):
+        for notation in super().notation():
+            yield notation + self.buffer
+
     def apply(self, game: Game) -> None:
         super().apply(game)
         self.buffer, game.board[self.end] = game.board[self.end], self.buffer

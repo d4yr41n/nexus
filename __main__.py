@@ -1,16 +1,21 @@
 from curses import curs_set, napms, newwin, wrapper, use_default_colors, KEY_ENTER
 from curses.textpad import Textbox
+from string import ascii_letters
 
 from .game import Game
 
 
+allowed = ascii_letters + "0123456789"
+
+
 class Client:
     def main(self, stdscr) -> None:
+        curs_set(0)
         use_default_colors()
         data = ""
         game = Game()
         game.setup()
-        moves = {str(move): move for move in  game.moves}
+        moves = game.annotate()
         help = False
     
         while True:
@@ -36,16 +41,20 @@ class Client:
             if c == 113:
                 break
             elif c == 10:
-                if (move := moves.get(data)):
+                if data == "exit":
+                    break
+                elif (move := moves.get(data)):
                     game.apply(move)
-                    moves = {str(move): move for move in  game.moves}
+                    moves = game.annotate()
                 data = ''
             elif c == 263:
                 data = data[:-1]
             elif c == 9:
                 help = True
             else:
-                data += chr(c)
+                char = chr(c)
+                if char in allowed:
+                    data += chr(c)
     
 
 if __name__ == "__main__":

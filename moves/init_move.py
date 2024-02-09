@@ -1,36 +1,43 @@
-from .move import AbstractMove, Move
+from .abstract_move import AbstractMove
+from .move import Move
 
 
-class AbstractInitMove(AbstractMove):
-    castling_side: str
+class InitMove(AbstractMove):
+    castling: str | None = None
 
     def apply(self, game):
-        game.castling = game.castling.replace(self.castling_side, '')
         super().apply(game)
+        if self.castling:
+            game.castling = game.castling.replace(self.castling, '')
 
     def cancel(self, game):
         super().cancel(game)
-        game.castling = str(sorted(game.castling + self.castling_side))
+        if self.castling:
+            game.castling = str(sorted(game.castling + self.castling))
+            self.castling = None
 
 
-class PieceInitMove(AbstractInitMove, Move):
+class RookMove(InitMove, Move):
     def apply(self, game):
         super(Move, self).apply(game)
-        super(AbstractMove, self).apply(game)
+        castling = ("kq", "KQ")[self.piece.side][not self.start % 8]
+        if castling in game.castling:
+            self.castling = castling
+            super(InitMove, self).apply(game)
+
+
+class KingMove(InitMove, Move):
+    def apply(self, game):
+        super(Move, self).apply(game)
+        castling = ("kq", "KQ")[self.piece.side]
+        if castling in game.castling:
+            self.castling = castling
+            super(InitMove, self).apply(game)
+        game.kings[self.piece.side] = self.end
 
     def cancel(self, game):
+        super(InitMove, self).cancel(game)
         super(Move, self).cancel(game)
-        super(AbstractMove, self).cancel(game)
+        game.kings[self.piece.side] = self.start
 
 
-class KingInitMove(PieceInitMove):
-    def __init__(self, piece, start, end):
-        super().__init__(piece, start, end)
-        self.sides = ("kq", "KQ")[piece.side]
-
-
-class RookInitMove(PieceInitMove):
-    def __init__(self, piece, start, end):
-        super().__init__(piece, start, end)
-        self.sides = ("qk", "QK")[piece.side][not start % 8]
-        
