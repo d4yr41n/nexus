@@ -3,7 +3,7 @@ from collections.abc import Generator
 from typing import TYPE_CHECKING
 
 from .piece import Piece
-from ..moves import Castling, Move
+from ..moves import Castling, KingMove
 
 if TYPE_CHECKING:
     from ..game import Game
@@ -32,11 +32,11 @@ class King(Piece):
         if x > 0 and y > 0:
             yield position - 9
 
-    def moves(self, game: Game, position: int) -> Generator[Move | Castling, None, None]:
+    def moves(self, game: Game, position: int) -> Generator[KingMove | Castling, None, None]:
         for i in self.handles(game, position):
-            if (not (piece := game.board[i]) or piece.side is not self.side
+            if ((not (piece := game.board[i]) or piece.side is not self.side)
                 and not game.board[i].handlers[not self.side]):
-                yield Move(self, position, i)
+                yield KingMove(self, position, i)
 
         if ("kK"[self.side] in game.castling
             and not (f := game.board[position + 1]) and not f.handlers[not self.side]

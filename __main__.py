@@ -1,4 +1,4 @@
-from curses import curs_set, napms, newwin, wrapper, use_default_colors, KEY_ENTER
+from curses import COLOR_BLUE, COLOR_RED, color_pair, curs_set, napms, newwin, start_color, wrapper, use_default_colors, KEY_ENTER, init_pair
 from curses.textpad import Textbox
 from string import ascii_letters
 
@@ -17,15 +17,23 @@ class Client:
         game.setup()
         moves = game.annotate()
         help = False
-    
+
+        init_pair(1, COLOR_BLUE, -1)
+        init_pair(2, COLOR_RED, -1)
+
         while True:
             stdscr.erase()
     
             stdscr.addstr("    a b c d e f g h\n\n")
-            for i in range(8, 0, -1):
-                stdscr.addstr(
-                    f"{i}   {' '.join(str(i) if i else '·' for i in game.board[(i-1)*8:i*8])}   {i}\n"
-                )
+            for i in range(7, -1, -1):
+                stdscr.addstr(f"{i + 1}   ")
+                for j in range(8):
+                    if (piece := game.board[i * 8 + j]):
+                        stdscr.addstr(f"{piece} ", color_pair(piece.side + 1))
+                    else:
+                        stdscr.addstr(f"{piece} ")
+                stdscr.addstr(f"  {i + 1}")
+                stdscr.addch('\n')
             stdscr.addstr("\n    a b c d e f g h")
 
             l = len(game.record)

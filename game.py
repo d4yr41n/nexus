@@ -5,7 +5,7 @@ from .moves import AbstractMove
 
 class Game:
     turn: bool
-    board: list[Piece | Empty] = [Empty()] * 64
+    board: list[Piece | Empty] = [Empty() for _ in range(64)]
     record = []
     en_passant: int | None = None
     castling: str = "KQkq"
@@ -47,16 +47,22 @@ class Game:
         self.board[62] = Knight(False)
         self.board[63] = Rook(False)
  
+        super().__init__()
         for i in range(48, 56):
             self.board[i] = Pawn(False)
         
-        self.kings = [3, 59]
+        self.kings = [59, 4]
         self.turn = True
         self.update()
 
 
     def update(self):
         self.moves.clear()
+
+        for i in range(64):
+            self.board[i].handlers[0].clear()
+            self.board[i].handlers[1].clear()
+
         for i in range(64):
             if (piece := self.board[i]):
                 for j in piece.handles(self, i):
@@ -75,4 +81,8 @@ class Game:
         self.record.append(move)
         self.turn = not self.turn
         self.update()
+
+    def input(self, notation: str):
+        if (move := self.annotate().get(notation)):
+            self.apply(move)
 

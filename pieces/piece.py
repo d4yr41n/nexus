@@ -14,6 +14,7 @@ class Piece(Empty):
     repr: tuple[str, str]
 
     def __init__(self, side: bool) -> None:
+        self.handlers = [], []
         self.side = side
 
     def __repr__(self) -> str:

@@ -1,5 +1,6 @@
-def main():
-    allowed = range(64)
+class PinnedPiece
+    def pin(self, game):
+        allowed = range(64)
         for handler in self.handlers[not self.side]:
             if isinstance(game.board[handler], SlidingPiece):
                 x1, y1 = position % 8, position // 8
@@ -36,9 +37,5 @@ def main():
                 else:
                     continue
                 break
-                        
-
-        for i in self.handles(game, position):
-            if not (piece := game.board[i]) or piece.side is not self.side:
-                yield Move(self, position, i)
+        return allowed
 
