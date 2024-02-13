@@ -5,7 +5,7 @@ from string import ascii_letters
 from .game import Game
 
 
-allowed = ascii_letters + "0123456789"
+allowed = ascii_letters + "-0123456789"
 
 
 class Client:
