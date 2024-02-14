@@ -1,6 +1,5 @@
 class PinnedPiece
-    def pin(self, game):
-        allowed = range(64)
+    def allowed(self, game):
         for handler in self.handlers[not self.side]:
             if isinstance(game.board[handler], SlidingPiece):
                 x1, y1 = position % 8, position // 8
@@ -32,10 +31,6 @@ class PinnedPiece
                 for i in range(position, -1, d):
                     if game.board[i]:
                         if i == king:
-                            allowed = range(handler, position, d)
-                        break
-                else:
-                    continue
-                break
-        return allowed
+                            return range(handler, position, d)
+        return range(64)
 

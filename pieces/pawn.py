@@ -5,9 +5,10 @@ from .knight import Knight
 from .bishop import Bishop
 from .rook import Rook
 from .queen import Queen
+from .pinned_piece import PinnedPiece
 from ..moves import AbstractMove, Move, DoubleForward, Promotion
 
-class Pawn(Piece):
+class Pawn(Piece, PinnedPiece):
     char = ''
     repr = 'p', 'P'
 
@@ -26,10 +27,11 @@ class Pawn(Piece):
 
     def moves(self, game, position: int) -> Generator[AbstractMove, None, None]:
         x, y = position % 8, position // 8
+        allowed = self.allowed()
 
         if self.side:
             right = position + 9
-            if x < 7 and (piece := game.board[right]) and piece.side is not self.side:
+            if x < 7 and (piece := game.board[right]) and piece.side is not self.side and right in allowed:
                 if y == 6:
                     yield Promotion(self, position, right, Knight)
                     yield Promotion(self, position, right, Bishop)
@@ -39,7 +41,7 @@ class Pawn(Piece):
                     yield Move(self, position, right)
 
             left = position + 7
-            if x > 0 and (piece := game.board[left]) and piece.side is not self.side:
+            if x > 0 and (piece := game.board[left]) and piece.side is not self.side and left in allowed:
                 if y == 6:
                     yield Promotion(self, position, left, Knight)
                     yield Promotion(self, position, left, Bishop)
@@ -49,7 +51,7 @@ class Pawn(Piece):
                     yield Move(self, position, left)
 
             forward = position + 8
-            if not game.board[forward]:
+            if not game.board[forward] and forward in allowed:
                 if y == 6:
                     yield Promotion(self, position, forward, Knight)
                     yield Promotion(self, position, forward, Bishop)
@@ -62,7 +64,7 @@ class Pawn(Piece):
                     yield DoubleForward(self, position, double, forward)
         else:
             left = position - 9
-            if x > 0 and (piece := game.board[left]) and piece.side is not self.side:
+            if x > 0 and (piece := game.board[left]) and piece.side is not self.side and left in allowed:
                 if y == 1:
                     yield Promotion(self, position, left, Knight)
                     yield Promotion(self, position, left, Bishop)
@@ -72,7 +74,7 @@ class Pawn(Piece):
                     yield Move(self, position, left)
 
             right = position - 7
-            if x < 7 and (piece := game.board[right]) and piece.side is not self.side:
+            if x < 7 and (piece := game.board[right]) and piece.side is not self.side and right in allowed:
                 if y == 1:
                     yield Promotion(self, position, right, Knight)
                     yield Promotion(self, position, right, Bishop)
@@ -82,7 +84,7 @@ class Pawn(Piece):
                     yield Move(self, position, right)
 
             forward = position - 8
-            if not game.board[forward]:
+            if not game.board[forward] and forward in allowed:
                 if y == 1:
                     yield Promotion(self, position, forward, Knight)
                     yield Promotion(self, position, forward, Bishop)
