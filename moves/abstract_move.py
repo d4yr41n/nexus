@@ -18,8 +18,10 @@ class AbstractMove:
     def apply(self, game: Game) -> None:
         self.en_passant = game.en_passant
         game.en_passant = None
+        game.turn = not game.turn
 
     def cancel(self, game: Game) -> None:
         game.en_passant = self.en_passant
         self.en_passant = None
+        game.turn = not game.turn
 

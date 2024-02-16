@@ -8,7 +8,7 @@ from .queen import Queen
 from .pinned_piece import PinnedPiece
 from ..moves import AbstractMove, Move, DoubleForward, Promotion
 
-class Pawn(Piece, PinnedPiece):
+class Pawn(PinnedPiece):
     char = ''
     repr = 'p', 'P'
 
@@ -27,7 +27,7 @@ class Pawn(Piece, PinnedPiece):
 
     def moves(self, game, position: int) -> Generator[AbstractMove, None, None]:
         x, y = position % 8, position // 8
-        allowed = self.allowed()
+        allowed = self.allowed(game, position)
 
         if self.side:
             right = position + 9

@@ -50,9 +50,10 @@ class Game:
         super().__init__()
         for i in range(48, 56):
             self.board[i] = Pawn(False)
-        
-        self.kings = [59, 4]
+
         self.turn = True
+
+        self.kings = [59, 4]
         self.update()
 
 
@@ -79,7 +80,6 @@ class Game:
     def apply(self, move):
         move.apply(self)
         self.record.append(move)
-        self.turn = not self.turn
         self.update()
 
     def input(self, notation: str):

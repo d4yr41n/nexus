@@ -1,13 +1,14 @@
 from typing import TYPE_CHECKING
 
 from .sliding_piece import SlidingPiece
+from .pinned_piece import PinnedPiece
 from ..moves import Move
 
 if TYPE_CHECKING:
     from ..game import Game
 
 
-class Bishop(SlidingPiece):
+class Bishop(SlidingPiece, PinnedPiece):
     char = 'B'
     repr = 'b', 'B'
 

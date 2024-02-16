@@ -1,5 +1,9 @@
-class PinnedPiece
-    def allowed(self, game):
+from .piece import Piece
+from .sliding_piece import SlidingPiece
+
+
+class PinnedPiece(Piece):
+    def allowed(self, game, position):
         for handler in self.handlers[not self.side]:
             if isinstance(game.board[handler], SlidingPiece):
                 x1, y1 = position % 8, position // 8

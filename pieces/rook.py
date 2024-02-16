@@ -1,6 +1,7 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 
+from .pinned_piece import PinnedPiece
 from .sliding_piece import SlidingPiece
 from ..moves import RookMove
 
@@ -8,7 +9,7 @@ if TYPE_CHECKING:
     from ..game import Game
 
 
-class Rook(SlidingPiece):
+class Rook(SlidingPiece, PinnedPiece):
     char = 'R'
     repr = 'r', 'R'
 
