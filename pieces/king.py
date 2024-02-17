@@ -3,14 +3,13 @@ from collections.abc import Generator
 from typing import TYPE_CHECKING
 
 from .piece import Piece
-from ..moves import Castling, KingMove
 
 if TYPE_CHECKING:
     from ..game import Game
 
 
 class King(Piece):
-    char = 'K'
+    notation = 'K'
     repr = 'k', 'K'
 
     def handles(self, game: Game, position: int) -> Generator[int, None, None]:
@@ -48,4 +47,8 @@ class King(Piece):
             and not (c := game.board[position - 2]) and not c.handlers[not self.side]
             and not (b := game.board[position - 3]) and not b.handlers[not self.side]):
             yield Castling(position, position - 4)
+
+
+from ..moves.castling import Castling
+from ..moves.king_move import KingMove
 

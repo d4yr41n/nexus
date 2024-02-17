@@ -1,0 +1,15 @@
+from .abstract_move import AbstractMove
+
+
+class CastlingStateMove(AbstractMove):
+    castling: str
+
+    def __init__(self):
+        self.castling = ''
+
+    def apply(self, game):
+        game.castling = game.castling.replace(self.castling, '')
+
+    def cancel(self, game):
+        game.castling = str(sorted(game.castling + self.castling))
+

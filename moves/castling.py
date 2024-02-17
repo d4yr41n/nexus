@@ -2,13 +2,13 @@ from __future__ import annotations
 from collections.abc import Generator
 from typing import TYPE_CHECKING
 
-from .init_move import InitMove
+from .castling_state_move import CastlingStateMove
 
 if TYPE_CHECKING:
     from ..game import Game
 
 
-class Castling(InitMove):
+class Castling(CastlingStateMove):
     def __init__(self, king: int, rook: int) -> None:
         self.king = king
         self.rook = rook
@@ -36,11 +36,13 @@ class Castling(InitMove):
             game.board[self.rook], game.board[self.rook + 3] = game.board[self.rook + 3], game.board[self.rook]
 
     def apply(self, game: Game):
-        self.castling = ("kq", "KQ")[game.board[self.king].side]
         self.castle(game)
+        self.castling = ("kq", "KQ")[game.board[self.king].side]
         super().apply(game)
+        super(CastlingStateMove, self).apply(game)
 
     def cancel(self, game: Game): 
         self.castle(game)
         super().cancel(game)
+        super(CastlingStateMove, self).cancel(game)
 

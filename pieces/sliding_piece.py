@@ -3,7 +3,6 @@ from collections.abc import Generator
 from typing import TYPE_CHECKING
 
 from .piece import Piece
-from ..moves import Move
 
 if TYPE_CHECKING:
     from ..game import Game

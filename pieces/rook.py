@@ -1,16 +1,14 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 
-from .pinned_piece import PinnedPiece
 from .sliding_piece import SlidingPiece
-from ..moves import RookMove
 
 if TYPE_CHECKING:
     from ..game import Game
 
 
-class Rook(SlidingPiece, PinnedPiece):
-    char = 'R'
+class Rook(SlidingPiece):
+    notation = 'R'
     repr = 'r', 'R'
 
     def lines(self, position: int) -> tuple[range, ...]:
@@ -24,6 +22,10 @@ class Rook(SlidingPiece, PinnedPiece):
 
     def moves(self, game: Game, position: int) -> Generator[RookMove, None, None]: 
         for i in self.handles(game, position):
-            if not (piece := game.board[i]) or piece.side is not self.side:
+            if ((not (piece := game.board[i]) or piece.side is not self.side)
+                and i in self.allowed(game, position)):
                 yield RookMove(self, position, i)
+
+
+from ..moves.rook_move import RookMove
 

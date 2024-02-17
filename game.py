@@ -1,6 +1,12 @@
-from .pieces import Bishop, Piece, Knight, King, Rook, Queen, Pawn
+from .pieces.bishop import Bishop
+from .pieces.piece import Piece
+from .pieces.knight import Knight
+from .pieces.king import King
+from .pieces.rook import Rook
+from .pieces.queen import Queen
+from .pieces.pawn import Pawn
 from .empty import Empty
-from .moves import AbstractMove
+from .moves.abstract_move import AbstractMove
 
 
 class Game:
@@ -11,6 +17,7 @@ class Game:
     castling: str = "KQkq"
     kings: list[int]
     moves: list[AbstractMove] = []
+    end = False
 
     def annotate(self):
         exclude = []
@@ -53,7 +60,7 @@ class Game:
 
         self.turn = True
 
-        self.kings = [59, 4]
+        self.kings = [60, 4]
         self.update()
 
     def update(self):
@@ -75,6 +82,9 @@ class Game:
             for i in range(64):
                 if (piece := self.board[i]) and piece.side is self.turn:
                     self.moves.extend(piece.moves(self, i))
+
+        if not self.moves:
+            self.end = True
 
     def apply(self, move):
         move.apply(self)

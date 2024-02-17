@@ -24,14 +24,15 @@ class Client:
         while True:
             stdscr.erase()
     
+            stdscr.addstr(f"White     {'End' if game.end else '   '}     Black\n\n")
             stdscr.addstr("    a b c d e f g h\n\n")
             for i in range(7, -1, -1):
                 stdscr.addstr(f"{i + 1}   ")
                 for j in range(8):
                     if (piece := game.board[i * 8 + j]):
-                        stdscr.addstr(f"{piece} ", color_pair(piece.side + 1))
+                        stdscr.addstr(f"{repr(piece)} ", color_pair(piece.side + 1))
                     else:
-                        stdscr.addstr(f"{piece} ")
+                        stdscr.addstr(f"{repr(piece)} ")
                 stdscr.addstr(f"  {i + 1}")
                 stdscr.addch('\n')
             stdscr.addstr("\n    a b c d e f g h")
@@ -40,7 +41,7 @@ class Client:
             for i in range(0, len(game.record), 2):
                 stdscr.addstr(i // 2, 26, f"{i // 2 + 1}. {game.record[i]}{ f' - {game.record[i+1]}' if l - 1 > i else ''}")
 
-            stdscr.addstr(13, 0, f"> {data}")
+            stdscr.addstr(15, 0, f"> {data}")
 
             if help:
                 stdscr.addstr(15, 0, ' '.join(str(i) for i in moves))

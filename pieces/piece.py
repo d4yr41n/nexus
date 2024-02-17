@@ -3,10 +3,37 @@ from collections.abc import Generator
 from typing import TYPE_CHECKING
 
 from ..empty import Empty
-from ..moves import AbstractMove
 
 if TYPE_CHECKING:
     from ..game import Game
+    from ..moves.abstract_move import AbstractMove
+
+
+def get_vector(handler, target):
+    x1, y1 = handler % 8, handler // 8
+    x2, y2 = target % 8, target // 8
+    if x1 == x2:
+        if y1 > y2:
+            vector = -8
+        else:
+            vector = 8
+    elif y1 == y2:
+        if x1 > x2:
+            vector = -1
+        else:
+            vector = 1
+    else:
+        if x1 > x2:
+            if y1 > y2:
+                vector = -9
+            else:
+                vector = 7
+        else:
+            if y1 > y2:
+                vector = -7
+            else:
+                vector = 9
+    return vector
 
 
 class Piece(Empty):
@@ -20,6 +47,9 @@ class Piece(Empty):
     def __repr__(self) -> str:
         return self.repr[self.side]
 
+    def __str__(self) -> str:
+        return self.notation
+
     def __bool__(self) -> bool:
         return True
 
@@ -27,5 +57,37 @@ class Piece(Empty):
         raise NotImplementedError
 
     def moves(self, game: Game, position: int) -> Generator[AbstractMove, None, None]: 
-        raise NotImplementedError
+        for i in self.handles(game, position):
+            if ((not (piece := game.board[i])
+                 or piece.side is not self.side)
+                and i in self.allowed(game, position)):
+                yield Move(self, position, i)
+
+    def allowed(self, game, position):
+        valid = range(64)
+        pinned = False
+        king = game.kings[self.side]
+
+        for handler in self.handlers[not self.side]:
+            if isinstance(game.board[handler], SlidingPiece):
+                vector = get_vector(handler, position)
+                for i in range(position, -1, vector):
+                    if game.board[i]:
+                        if i == king:
+                            valid = range(handler, position, vector)
+                            pinned = True
+                        break
+
+        handlers = game.board[king].handlers[not self.side]
+        if len(handlers) == 1 and not pinned:
+            handler = handlers[0]
+            return range(handler, king, get_vector(handler, king))
+        elif not handlers:
+            return valid
+        else:
+            return range(0)
+
+
+from .sliding_piece import SlidingPiece
+from ..moves.move import Move
 

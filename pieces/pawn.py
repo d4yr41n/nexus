@@ -1,15 +1,21 @@
+from __future__ import annotations
+
 from collections.abc import Generator
+from typing import TYPE_CHECKING
 
 from .piece import Piece
 from .knight import Knight
 from .bishop import Bishop
 from .rook import Rook
 from .queen import Queen
-from .pinned_piece import PinnedPiece
-from ..moves import AbstractMove, Move, DoubleForward, Promotion
+from .piece import Piece
 
-class Pawn(PinnedPiece):
-    char = ''
+if TYPE_CHECKING:
+    from ..moves.abstract_move import AbstractMove
+
+
+class Pawn(Piece):
+    notation = ''
     repr = 'p', 'P'
 
     def handles(self, game, position):
@@ -95,4 +101,9 @@ class Pawn(PinnedPiece):
                 double = forward - 8
                 if y == 6 and not game.board[double]:
                     yield DoubleForward(self, position, double, forward)
+
+
+from ..moves.move import Move
+from ..moves.double_forward import DoubleForward
+from ..moves.promotion import Promotion
 

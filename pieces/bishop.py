@@ -1,15 +1,13 @@
 from typing import TYPE_CHECKING
 
 from .sliding_piece import SlidingPiece
-from .pinned_piece import PinnedPiece
-from ..moves import Move
 
 if TYPE_CHECKING:
     from ..game import Game
 
 
-class Bishop(SlidingPiece, PinnedPiece):
-    char = 'B'
+class Bishop(SlidingPiece):
+    notation = 'B'
     repr = 'b', 'B'
 
     def lines(self, position: int) -> tuple[range, ...]:
