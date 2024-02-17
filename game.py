@@ -56,7 +56,6 @@ class Game:
         self.kings = [59, 4]
         self.update()
 
-
     def update(self):
         self.moves.clear()
 

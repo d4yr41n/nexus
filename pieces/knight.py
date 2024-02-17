@@ -1,15 +1,15 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING, Generator
 
-from .piece import Piece
+from .base_piece import BasePiece
 from ..moves import Move
 
 if TYPE_CHECKING:
     from ..game import Game
 
 
-class Knight(Piece):
-    char = 'N'
+class Knight(BasePiece):
+    notation = 'N'
     repr = 'n', 'N'
 
     def handles(self, game: Game, position: int) -> Generator[int, None, None]:
@@ -33,3 +33,5 @@ class Knight(Piece):
         if x < 6 and y > 0:
             yield position - 6
 
+    def moves(self, game, position):
+        pass

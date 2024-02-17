@@ -3,18 +3,18 @@ from collections.abc import Generator
 from typing import TYPE_CHECKING
 
 from ..empty import Empty
-from ..moves import AbstractMove, Move
+from ..moves import AbstractMove
 
 if TYPE_CHECKING:
     from ..game import Game
 
 
 class Piece(Empty):
-    char: str
+    notation: str
     repr: tuple[str, str]
 
     def __init__(self, side: bool) -> None:
-        self.handlers = [], []
+        super().__init__()
         self.side = side
 
     def __repr__(self) -> str:
@@ -27,7 +27,5 @@ class Piece(Empty):
         raise NotImplementedError
 
     def moves(self, game: Game, position: int) -> Generator[AbstractMove, None, None]: 
-        for i in self.handles(game, position):
-            if not (piece := game.board[i]) or piece.side is not self.side:
-                yield Move(self, position, i)
+        raise NotImplementedError
 
