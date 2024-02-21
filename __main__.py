@@ -3,6 +3,7 @@ from curses.textpad import Textbox
 from string import ascii_letters
 
 from .game import Game
+from .ai import AI
 
 
 allowed = ascii_letters + "-0123456789"
@@ -14,6 +15,7 @@ class Client:
         use_default_colors()
         data = ""
         game = Game()
+        ai = AI(False, 2)
         game.setup()
         moves = game.annotate()
         help = False
@@ -22,9 +24,15 @@ class Client:
         init_pair(2, COLOR_RED, -1)
 
         while True:
-            stdscr.erase()
-    
-            stdscr.addstr(f"White     {'End' if game.end else '   '}     Black\n\n")
+
+            if game.result is None:
+                result = '     '
+            elif game.result == -1:
+                result = '0 - 1'
+            elif game.result == 1:
+                result = '1 - 0'
+            stdscr.erase() 
+            stdscr.addstr(f"White    {result}    Black\n\n")
             stdscr.addstr("    a b c d e f g h\n\n")
             for i in range(7, -1, -1):
                 stdscr.addstr(f"{i + 1}   ")
@@ -44,7 +52,7 @@ class Client:
             stdscr.addstr(15, 0, f"> {data}")
 
             if help:
-                stdscr.addstr(15, 0, ' '.join(str(i) for i in moves))
+                stdscr.addstr(17, 0, ' '.join(str(i) for i in moves))
     
             c = stdscr.getch()
             if c == 113:
@@ -55,6 +63,7 @@ class Client:
                 elif (move := moves.get(data)):
                     game.apply(move)
                     moves = game.annotate()
+
                 data = ''
             elif c == 263:
                 data = data[:-1]

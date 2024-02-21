@@ -44,7 +44,7 @@ class Move(CastlingStateMove):
         if self.target:
             castling = ("kq", "KQ")[self.target.side][not self.end % 8]
             if (isinstance(self.target, Rook) and castling in game.castling):
-                self.castling = str(sorted(self.castling + castling))
+                self.castling += castling
                 super().apply(game)
 
     def cancel(self, game: Game) -> None:

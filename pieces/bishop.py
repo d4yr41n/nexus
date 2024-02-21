@@ -9,6 +9,7 @@ if TYPE_CHECKING:
 class Bishop(SlidingPiece):
     notation = 'B'
     repr = 'b', 'B'
+    value = 3
 
     def lines(self, position: int) -> tuple[range, ...]:
         x, y = position % 8, position // 8

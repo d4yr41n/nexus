@@ -17,6 +17,7 @@ if TYPE_CHECKING:
 class Pawn(Piece):
     notation = ''
     repr = 'p', 'P'
+    value = 1
 
     def handles(self, game, position):
         x = position % 8

@@ -10,15 +10,10 @@ if TYPE_CHECKING:
 class Rook(SlidingPiece):
     notation = 'R'
     repr = 'r', 'R'
+    value = 5
 
     def lines(self, position: int) -> tuple[range, ...]:
-        x, y = position % 8, position // 8
-        return (
-            range(position + 1, (y + 1) * 8),
-            range(position + 8, 57 + x, 8),
-            range(position - 1, y * 8 - 1, -1),
-            range(position - 8, x, -8),
-        )
+        return range(position + vector, (position & 15) + 7 , vector)
 
     def moves(self, game: Game, position: int) -> Generator[RookMove, None, None]: 
         for i in self.handles(game, position):

@@ -2,7 +2,8 @@ from __future__ import annotations
 from collections.abc import Generator
 from typing import TYPE_CHECKING
 
-from .piece import Piece
+from .piece import Piece, edge, get_vector
+from .sliding_piece import SlidingPiece
 
 if TYPE_CHECKING:
     from ..game import Game
@@ -11,6 +12,7 @@ if TYPE_CHECKING:
 class King(Piece):
     notation = 'K'
     repr = 'k', 'K'
+    value = 0
 
     def handles(self, game: Game, position: int) -> Generator[int, None, None]:
         x, y = position % 8, position // 8
@@ -31,10 +33,19 @@ class King(Piece):
         if x > 0 and y > 0:
             yield position - 9
 
+    def allowed(self, game, position) -> set:
+        valid = set(range(64))
+        for handler in self.handlers[not self.side]:
+            if isinstance(game.board[handler], SlidingPiece):
+                vector = get_vector(handler, position)
+                valid -= set(range(handler + vector, edge(handler, vector), vector))
+        return valid
+
     def moves(self, game: Game, position: int) -> Generator[KingMove | Castling, None, None]:
         for i in self.handles(game, position):
             if ((not (piece := game.board[i]) or piece.side is not self.side)
-                and not game.board[i].handlers[not self.side]):
+                and not game.board[i].handlers[not self.side]
+                and i in self.allowed(game, position)):
                 yield KingMove(self, position, i)
 
         if ("kK"[self.side] in game.castling

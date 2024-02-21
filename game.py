@@ -17,7 +17,7 @@ class Game:
     castling: str = "KQkq"
     kings: list[int]
     moves: list[AbstractMove] = []
-    end = False
+    result: int | None = None
 
     def annotate(self):
         exclude = []
@@ -84,11 +84,20 @@ class Game:
                     self.moves.extend(piece.moves(self, i))
 
         if not self.moves:
-            self.end = True
+            if self.board[king].handlers[not self.turn]:
+                self.result = (1, -1)[self.turn]
+            else:
+                self.result = 0
+            
 
     def apply(self, move):
         move.apply(self)
         self.record.append(move)
+        self.update()
+
+    def cancel(self):
+        self.record[-1].cancel(self)
+        del self.record[-1]
         self.update()
 
     def input(self, notation: str):

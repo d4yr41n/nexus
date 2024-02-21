@@ -1,3 +1,5 @@
+from time import sleep
+
 from .abstract_move import AbstractMove
 
 
@@ -11,5 +13,5 @@ class CastlingStateMove(AbstractMove):
         game.castling = game.castling.replace(self.castling, '')
 
     def cancel(self, game):
-        game.castling = str(sorted(game.castling + self.castling))
+        game.castling = ''.join(sorted(game.castling + self.castling))
 

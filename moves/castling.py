@@ -28,21 +28,31 @@ class Castling(CastlingStateMove):
             yield "0-0-0"
 
     def castle(self, game):
+        king = game.kings[game.turn]
         if self.king < self.rook:
             game.board[self.king], game.board[self.king + 2] = game.board[self.king + 2], game.board[self.king]
             game.board[self.rook], game.board[self.rook - 2] = game.board[self.rook - 2], game.board[self.rook]
+            if self.king == king:
+                game.kings[game.turn] = king + 2
+            else:
+                game.kings[game.turn] = self.king
         else:
+
             game.board[self.king], game.board[self.king - 2] = game.board[self.king - 2], game.board[self.king] 
             game.board[self.rook], game.board[self.rook + 3] = game.board[self.rook + 3], game.board[self.rook]
+            if self.king == king:
+                game.kings[game.turn] = king + 3
+            else:
+                game.kings[game.turn] = self.king
 
     def apply(self, game: Game):
-        self.castle(game)
         self.castling = ("kq", "KQ")[game.board[self.king].side]
+        self.castle(game)
         super().apply(game)
         super(CastlingStateMove, self).apply(game)
 
     def cancel(self, game: Game): 
+        super(CastlingStateMove, self).cancel(game)
         self.castle(game)
         super().cancel(game)
-        super(CastlingStateMove, self).cancel(game)
 
