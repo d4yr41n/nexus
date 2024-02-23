@@ -62,7 +62,7 @@ class Client:
                 break
             elif c == 10:
                 if data == "ai":
-                    game.apply(ai.get_move(game))
+                    game.apply(ai.process(game))
                     moves = game.annotate()
                     help = False
                 elif data == "exit":

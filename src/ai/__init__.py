@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from math import inf
+from multiprocessing import Pool
 
 from ..moves.abstract_move import AbstractMove
 from ..x88 import SQUARES
@@ -52,6 +53,10 @@ class Node:
         return value
 
 
+def node(args):
+    return Node(*args)
+
+
 class AI:
     side: bool
     depth: int
@@ -63,4 +68,10 @@ class AI:
     def get_move(self, game):
         nodes = [Node(game, move, self.depth) for move in game.moves]
         return (min, max)[game.turn](nodes, key=lambda node: node.value).move
+
+    def process(self, game):
+        with Pool(16) as pool:
+            nodes = pool.map(node, [(game, move, self.depth) for move in game.moves])
+        return (min, max)[game.turn](nodes, key=lambda node: node.value).move
+
 
