@@ -1,9 +1,11 @@
+#!/usr/bin/env python
+
 from curses import COLOR_BLUE, COLOR_RED, color_pair, curs_set, napms, newwin, start_color, wrapper, use_default_colors, KEY_ENTER, init_pair
 from curses.textpad import Textbox
 from string import ascii_letters
 
-from .game import Game
-from .ai import AI
+from src.game import Game
+from src.ai import AI
 
 
 allowed = ascii_letters + "-0123456789"
@@ -31,6 +33,8 @@ class Client:
                 result = '0 - 1'
             elif game.result == 1:
                 result = '1 - 0'
+            elif game.result == 0:
+                result = '0 - 0'
             stdscr.erase() 
             stdscr.addstr(f"White    {result}    Black\n\n")
             stdscr.addstr("    a b c d e f g h\n\n")
