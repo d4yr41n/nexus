@@ -2,13 +2,13 @@ from __future__ import annotations
 from collections.abc import Generator
 from typing import TYPE_CHECKING
 
-from .castling_state_move import CastlingStateMove
+from .abstract_move import AbstractMove
 
 if TYPE_CHECKING:
     from ..game import Game
 
 
-class Castling(CastlingStateMove):
+class Castling(AbstractMove):
     def __init__(self, king: int, rook: int) -> None:
         self.king = king
         self.rook = rook
@@ -28,31 +28,33 @@ class Castling(CastlingStateMove):
             yield "0-0-0"
 
     def castle(self, game):
-        king = game.kings[game.turn]
+        side = not self.king >> 4
+        king = game.kings[side]
         if self.king < self.rook:
             game.board[self.king], game.board[self.king + 2] = game.board[self.king + 2], game.board[self.king]
             game.board[self.rook], game.board[self.rook - 2] = game.board[self.rook - 2], game.board[self.rook]
             if self.king == king:
-                game.kings[game.turn] = king + 2
+                game.kings[side] = king + 2
             else:
-                game.kings[game.turn] = self.king
+                game.kings[side] = self.king
         else:
 
             game.board[self.king], game.board[self.king - 2] = game.board[self.king - 2], game.board[self.king] 
             game.board[self.rook], game.board[self.rook + 3] = game.board[self.rook + 3], game.board[self.rook]
             if self.king == king:
-                game.kings[game.turn] = king + 3
+                game.kings[side] = king - 2
             else:
-                game.kings[game.turn] = self.king
+                game.kings[side] = self.king
 
     def apply(self, game: Game):
-        self.castling = ("kq", "KQ")[game.board[self.king].side]
+        castling = ("kq", "KQ")[not self.king >> 4]
+        for i in castling:
+            if i in game.castling:
+                self.castling += i
         self.castle(game)
         super().apply(game)
-        super(CastlingStateMove, self).apply(game)
 
     def cancel(self, game: Game): 
-        super(CastlingStateMove, self).cancel(game)
         self.castle(game)
         super().cancel(game)
 

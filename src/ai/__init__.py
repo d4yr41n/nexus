@@ -15,7 +15,7 @@ class Node:
         self.move = move
         game.apply(move)
         if depth:
-            self.nodes = [Node(game, move, depth - 1) for move in game.moves]
+            self.nodes = [Node(game, i, depth - 1) for i in game.moves]
             if self.nodes:
                 self.value = (min, max)[game.turn](self.nodes, key=lambda node: node.value).value
             else:

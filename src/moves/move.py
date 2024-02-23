@@ -3,7 +3,6 @@ from collections.abc import Generator
 from typing import TYPE_CHECKING
 
 from .abstract_move import AbstractMove
-from .castling_state_move import CastlingStateMove
 from ..empty import Empty
 
 if TYPE_CHECKING:
@@ -15,7 +14,7 @@ file = "abcdefgh"
 rank = "12345678"
 
 
-class Move(CastlingStateMove):
+class Move(AbstractMove):
     target: Piece | None
 
     def __init__(self, piece: Piece, start: int, end: int) -> None:
@@ -39,22 +38,17 @@ class Move(CastlingStateMove):
         self.target = game.board[self.end]
         game.board[self.end] = game.board[self.start]
         game.board[self.start] = Empty()
-        super(CastlingStateMove, self).apply(game)
-
-        if self.target:
-            castling = ("kq", "KQ")[self.target.side][not self.end % 8]
-            if (isinstance(self.target, Rook) and castling in game.castling):
+        if self.target and isinstance(self.target, Rook):
+            castling = ("kq", "KQ")[self.target.side][not self.end & 7]
+            if castling in game.castling:
                 self.castling += castling
-                super().apply(game)
+        super().apply(game)
 
     def cancel(self, game: Game) -> None:
-        super(CastlingStateMove, self).cancel(game)
         game.board[self.start] = game.board[self.end]
         game.board[self.end] = self.target
         self.target = None
-
-        if self.castling:
-            super().cancel(game)
+        super().cancel(game)
 
 
 from ..pieces.rook import Rook

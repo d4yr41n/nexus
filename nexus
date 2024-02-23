@@ -21,7 +21,6 @@ class Client:
         game.setup()
         moves = game.annotate()
         help = False
-
         init_pair(1, COLOR_BLUE, -1)
         init_pair(2, COLOR_RED, -1)
 
@@ -68,6 +67,10 @@ class Client:
                     help = False
                 elif data == "exit":
                     break
+                elif data == "cancel":
+                    game.cancel()
+                    moves = game.annotate()
+                    help = False
                 elif (move := moves.get(data)):
                     game.apply(move)
                     moves = game.annotate()
