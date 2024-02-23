@@ -1,6 +1,11 @@
 from __future__ import annotations
 
+from math import inf
+from copy import deepcopy
+from multiprocessing import Process
+
 from ..moves.abstract_move import AbstractMove
+from ..x88 import SQUARES
 
 
 class Node:
@@ -12,28 +17,35 @@ class Node:
         self.move = move
         game.apply(move)
         if depth:
-            self.nodes = [Node(game, i, depth - 1) for i in game.moves]
-            self.value = (min, max)[game.turn](self.nodes, key=lambda node: node.value).value
+            self.nodes = [Node(game, move, depth - 1) for move in game.moves]
+            if self.nodes:
+                self.value = (min, max)[game.turn](self.nodes, key=lambda node: node.value).value
+            else:
+                self.value = self.eval(game)
         else:
             self.nodes = []
             self.value = self.eval(game)
         game.cancel()
 
-    def __repr__(self):
-        string = str(self.move) + ' ' + str(self.value) + '\n'
-        for node in self.nodes:
-            string += '\t' + str(node)
-        return string
+    # def __repr__(self):
+    #     string = str(self.move) + ' ' + str(self.value) + '\n'
+    #     for node in self.nodes:
+    #         string += '\t' + str(node)
+    #     return string
 
     def eval(self, game):
         value = 0
-        for i in range(64):
+        if game.result == -1:
+            return -inf
+        elif game.result == 1:
+            return inf
+        for i in SQUARES:
             if (piece := game.board[i]):
                 if piece.side:
                     value += piece.value
                 else:
                     value -= piece.value
-            if i in (27, 28, 35, 36):
+            if i in (51, 52, 67, 68):
                 value = round(value - len(piece.handlers[0]) * .3, 1)
                 value = round(value + len(piece.handlers[1]) * .3, 1)
             else:

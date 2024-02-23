@@ -2,8 +2,9 @@ from __future__ import annotations
 from collections.abc import Generator
 from typing import TYPE_CHECKING
 
-from .piece import Piece, edge, get_vector
+from .piece import Piece, get_vector
 from .sliding_piece import SlidingPiece
+from ..x88 import SQUARES
 
 if TYPE_CHECKING:
     from ..game import Game
@@ -13,39 +14,26 @@ class King(Piece):
     notation = 'K'
     repr = 'k', 'K'
     value = 0
-
-    def handles(self, game: Game, position: int) -> Generator[int, None, None]:
-        x, y = position % 8, position // 8
-        if x < 7:
-            yield position + 1
-        if x > 0:
-            yield position - 1
-        if y < 7:
-            yield position + 8
-        if y > 0:
-            yield position - 8
-        if x < 7 and y < 7:
-            yield position + 9
-        if x > 0 and y < 7:
-            yield position + 7
-        if x < 7 and y > 0:
-            yield position - 7
-        if x > 0 and y > 0:
-            yield position - 9
+    vectors = 1, 17, 16, 15, -1, -17, -16, -15
 
     def allowed(self, game, position) -> set:
-        valid = set(range(64))
+        valid = set(SQUARES)
         for handler in self.handlers[not self.side]:
             if isinstance(game.board[handler], SlidingPiece):
                 vector = get_vector(handler, position)
-                valid -= set(range(handler + vector, edge(handler, vector), vector))
+                edge = position
+                while not (edge := edge - vector) & 0x88:
+                    if game.board[edge]:
+                        break
+                valid -= set(range(handler + vector, edge, vector))
         return valid
 
     def moves(self, game: Game, position: int) -> Generator[KingMove | Castling, None, None]:
+        allowed = self.allowed(game, position)
         for i in self.handles(game, position):
             if ((not (piece := game.board[i]) or piece.side is not self.side)
                 and not game.board[i].handlers[not self.side]
-                and i in self.allowed(game, position)):
+                and i in allowed):
                 yield KingMove(self, position, i)
 
         if ("kK"[self.side] in game.castling

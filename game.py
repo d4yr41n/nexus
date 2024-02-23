@@ -1,3 +1,5 @@
+from typing import Literal
+
 from .pieces.bishop import Bishop
 from .pieces.piece import Piece
 from .pieces.knight import Knight
@@ -7,17 +9,24 @@ from .pieces.queen import Queen
 from .pieces.pawn import Pawn
 from .empty import Empty
 from .moves.abstract_move import AbstractMove
+from .x88 import SQUARES
 
 
 class Game:
     turn: bool
-    board: list[Piece | Empty] = [Empty() for _ in range(64)]
-    record = []
+    board: list[Empty | None]
+    record: list
     en_passant: int | None = None
     castling: str = "KQkq"
     kings: list[int]
-    moves: list[AbstractMove] = []
-    result: int | None = None
+    moves: list[AbstractMove]
+    result: Literal[-1, 0, 1] | None = None
+
+    def __init__(self):
+        self.board = [Empty() if i in SQUARES else None for i in range(128)]
+        self.record = []
+        self.kings = []
+        self.moves = []
 
     def annotate(self):
         exclude = []
@@ -42,35 +51,35 @@ class Game:
         self.board[6] = Knight(True)
         self.board[7] = Rook(True)
         
-        for i in range(8, 16):
+        for i in range(16, 24):
             self.board[i] = Pawn(True)
 
-        self.board[56] = Rook(False)
-        self.board[57] = Knight(False)
-        self.board[58] = Bishop(False)
-        self.board[59] = Queen(False)
-        self.board[60] = King(False)
-        self.board[61] = Bishop(False)
-        self.board[62] = Knight(False)
-        self.board[63] = Rook(False)
+        self.board[112] = Rook(False)
+        self.board[113] = Knight(False)
+        self.board[114] = Bishop(False)
+        self.board[115] = Queen(False)
+        self.board[116] = King(False)
+        self.board[117] = Bishop(False)
+        self.board[118] = Knight(False)
+        self.board[119] = Rook(False)
  
         super().__init__()
-        for i in range(48, 56):
+        for i in range(96, 104):
             self.board[i] = Pawn(False)
 
         self.turn = True
 
-        self.kings = [60, 4]
+        self.kings = [116, 4]
         self.update()
 
     def update(self):
         self.moves.clear()
 
-        for i in range(64):
+        for i in SQUARES:
             self.board[i].handlers[0].clear()
             self.board[i].handlers[1].clear()
 
-        for i in range(64):
+        for i in SQUARES:
             if (piece := self.board[i]):
                 for j in piece.handles(self, i):
                     self.board[j].handlers[piece.side].append(i)
@@ -79,7 +88,7 @@ class Game:
         if len(self.board[king].handlers[not self.turn]) == 2:
             self.moves.extend(self.board[king].moves(self, king))
         else:
-            for i in range(64):
+            for i in SQUARES:
                 if (piece := self.board[i]) and piece.side is self.turn:
                     self.moves.extend(piece.moves(self, i))
 
@@ -88,6 +97,8 @@ class Game:
                 self.result = (1, -1)[self.turn]
             else:
                 self.result = 0
+        else:
+            self.result = None
             
 
     def apply(self, move):

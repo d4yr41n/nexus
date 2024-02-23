@@ -13,7 +13,3 @@ class Knight(Piece):
     value = 3
     vectors = 18, 33, 31, 14, -18, -33, -31, -14
 
-    def handles(self, game: Game, position: int) -> Generator[int, None, None]:
-        for vector in self.vectors:
-            yield position + vector
-

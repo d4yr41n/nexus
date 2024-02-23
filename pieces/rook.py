@@ -11,15 +11,7 @@ class Rook(SlidingPiece):
     notation = 'R'
     repr = 'r', 'R'
     value = 5
-
-    def lines(self, position: int) -> tuple[range, ...]:
-        return range(position + vector, (position & 15) + 7 , vector)
-
-    def moves(self, game: Game, position: int) -> Generator[RookMove, None, None]: 
-        for i in self.handles(game, position):
-            if ((not (piece := game.board[i]) or piece.side is not self.side)
-                and i in self.allowed(game, position)):
-                yield RookMove(self, position, i)
+    vectors = 1, 16, -1, -16
 
 
 from ..moves.rook_move import RookMove

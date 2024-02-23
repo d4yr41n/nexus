@@ -37,7 +37,7 @@ class Client:
             for i in range(7, -1, -1):
                 stdscr.addstr(f"{i + 1}   ")
                 for j in range(8):
-                    if (piece := game.board[i * 8 + j]):
+                    if (piece := game.board[i * 16 + j]):
                         stdscr.addstr(f"{repr(piece)} ", color_pair(piece.side + 1))
                     else:
                         stdscr.addstr(f"{repr(piece)} ")
@@ -52,23 +52,25 @@ class Client:
             stdscr.addstr(15, 0, f"> {data}")
 
             if help:
-                stdscr.addstr(17, 0, ' '.join(str(i) for i in moves))
+                stdscr.addstr(17, 0, ' '.join(move for move in moves if move.startswith(data)))
     
             c = stdscr.getch()
             if c == 113:
                 break
             elif c == 10:
-                if data == "exit":
+                if data == "ai":
+                    game.apply(ai.get_move(game))
+                elif data == "exit":
                     break
                 elif (move := moves.get(data)):
                     game.apply(move)
                     moves = game.annotate()
-
+                    help = False
                 data = ''
             elif c == 263:
                 data = data[:-1]
             elif c == 9:
-                help = True
+                help = not help
             else:
                 char = chr(c)
                 if char in allowed:

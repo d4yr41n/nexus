@@ -1,14 +1,9 @@
-from .bishop import Bishop
-from .rook import Rook
+from .sliding_piece import SlidingPiece
 
 
-class Queen(Bishop, Rook):
+class Queen(SlidingPiece):
     notation = 'Q'
     repr = 'q', 'Q'
     value = 9
+    vectors = 1, 17, 16, 15, -1, -17, -16, -15
 
-    def lines(self, position: int) -> tuple[range, ...]:
-        return super().lines(position) + super(Bishop, self).lines(position)
-
-    def moves(self, game, position):
-        yield from super(Rook, self).moves(game, position)

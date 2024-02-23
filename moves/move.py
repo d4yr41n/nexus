@@ -25,13 +25,13 @@ class Move(CastlingStateMove):
         super().__init__()
 
     def __repr__(self) -> str:
-        start = f"{file[self.start % 8]}{rank[self.start // 8]}"
-        end = f"{file[self.end % 8]}{rank[self.end // 8]}"
+        start = f"{file[self.start & 7]}{rank[self.start >> 4]}"
+        end = f"{file[self.end & 7]}{rank[self.end >> 4]}"
         return f"{self.piece}{start}{end}"
 
     def notation(self) -> Generator[str, None, None]:
-        start = f"{file[self.start % 8]}{rank[self.start // 8]}"
-        end = f"{file[self.end % 8]}{rank[self.end // 8]}"
+        start = f"{file[self.start & 7]}{rank[self.start >> 4]}"
+        end = f"{file[self.end & 7]}{rank[self.end >> 4]}"
         yield f"{self.piece}{end}"
         yield f"{self.piece}{start}{end}"
 

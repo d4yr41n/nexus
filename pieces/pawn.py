@@ -18,90 +18,59 @@ class Pawn(Piece):
     notation = ''
     repr = 'p', 'P'
     value = 1
+    vectors = 17, 15
 
     def handles(self, game, position):
-        x = position % 8
-        if self.side:
-            if x < 7:
-                yield position + 9
-            if x > 0:
-                yield position + 7
-        else:
-            if x > 0:
-                yield position - 9
-            if x < 7:
-                yield position - 7
+        for vector in self.vectors:
+            if self.side:
+                square = position + vector
+            else:
+                square = position - vector
+
+            if not square & 0x88:
+                yield square
 
     def moves(self, game, position: int) -> Generator[AbstractMove, None, None]:
-        x, y = position % 8, position // 8
+        position_rank = position >> 4
         allowed = self.allowed(game, position)
 
         if self.side:
-            right = position + 9
-            if x < 7 and (piece := game.board[right]) and piece.side is not self.side and right in allowed:
-                if y == 6:
-                    yield Promotion(self, position, right, Knight)
-                    yield Promotion(self, position, right, Bishop)
-                    yield Promotion(self, position, right, Rook)
-                    yield Promotion(self, position, right, Queen)
-                else:
-                    yield Move(self, position, right)
-
-            left = position + 7
-            if x > 0 and (piece := game.board[left]) and piece.side is not self.side and left in allowed:
-                if y == 6:
-                    yield Promotion(self, position, left, Knight)
-                    yield Promotion(self, position, left, Bishop)
-                    yield Promotion(self, position, left, Rook)
-                    yield Promotion(self, position, left, Queen)
-                else:
-                    yield Move(self, position, left)
-
-            forward = position + 8
-            if not game.board[forward] and forward in allowed:
-                if y == 6:
-                    yield Promotion(self, position, forward, Knight)
-                    yield Promotion(self, position, forward, Bishop)
-                    yield Promotion(self, position, forward, Rook)
-                    yield Promotion(self, position, forward, Queen)
-                else:
-                    yield Move(self, position, forward)
-                double = forward + 8
-                if y == 1 and not game.board[double]:
-                    yield DoubleForward(self, position, double, forward)
+            start_rank = 1
+            promotion_rank = 7
+            left = position + 15
+            right = position + 17
+            forward = position + 16
+            double = forward + 16
         else:
-            left = position - 9
-            if x > 0 and (piece := game.board[left]) and piece.side is not self.side and left in allowed:
-                if y == 1:
-                    yield Promotion(self, position, left, Knight)
-                    yield Promotion(self, position, left, Bishop)
-                    yield Promotion(self, position, left, Rook)
-                    yield Promotion(self, position, left, Queen)
-                else:
-                    yield Move(self, position, left)
+            start_rank = 6
+            promotion_rank = 0
+            left = position - 17
+            right = position - 15
+            forward = position - 16
+            double = forward - 16
 
-            right = position - 7
-            if x < 7 and (piece := game.board[right]) and piece.side is not self.side and right in allowed:
-                if y == 1:
-                    yield Promotion(self, position, right, Knight)
-                    yield Promotion(self, position, right, Bishop)
-                    yield Promotion(self, position, right, Rook)
-                    yield Promotion(self, position, right, Queen)
+        for square in (left, right):
+            if (not square & 0x88 and (piece := game.board[square])
+                and piece.side is not self.side and square in allowed):
+                if square >> 4 == promotion_rank:
+                    yield Promotion(self, position, square, Knight)
+                    yield Promotion(self, position, square, Bishop)
+                    yield Promotion(self, position, square, Rook)
+                    yield Promotion(self, position, square, Queen)
                 else:
-                    yield Move(self, position, right)
+                    yield Move(self, position, square)
 
-            forward = position - 8
-            if not game.board[forward] and forward in allowed:
-                if y == 1:
-                    yield Promotion(self, position, forward, Knight)
-                    yield Promotion(self, position, forward, Bishop)
-                    yield Promotion(self, position, forward, Rook)
-                    yield Promotion(self, position, forward, Queen)
-                else:
-                    yield Move(self, position, forward)
-                double = forward - 8
-                if y == 6 and not game.board[double]:
-                    yield DoubleForward(self, position, double, forward)
+        if not game.board[forward] and forward in allowed:
+            if forward >> 4 == promotion_rank:
+                yield Promotion(self, position, forward, Knight)
+                yield Promotion(self, position, forward, Bishop)
+                yield Promotion(self, position, forward, Rook)
+                yield Promotion(self, position, forward, Queen)
+            elif position >> 4 == start_rank and not game.board[double] and double in allowed:
+                yield Move(self, position, forward)
+                yield DoubleForward(self, position, double, forward)
+            else:
+                yield Move(self, position, forward)
 
 
 from ..moves.move import Move

@@ -9,13 +9,11 @@ if TYPE_CHECKING:
 
 
 class SlidingPiece(Piece):
-    def lines(self, position: int) -> tuple[range, ...]:
-        raise NotImplementedError
-
     def handles(self, game: Game, position: int) -> Generator[int, None, None]:
-        for line in self.lines(position):
-            for i in line:
-                yield i
-                if game.board[i]:
+        for vector in self.vectors:
+            square = position
+            while not (square := square + vector) & 0x88:
+                yield square
+                if game.board[square]:
                     break
 
