@@ -10,5 +10,6 @@ class Bishop(SlidingPiece):
     notation = 'B'
     repr = 'b', 'B'
     value = 3
+    index = 3
     vectors = 17, 15, -17, -15
 

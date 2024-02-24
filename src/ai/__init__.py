@@ -70,7 +70,7 @@ class AI:
         return (min, max)[game.turn](nodes, key=lambda node: node.value).move
 
     def process(self, game):
-        with Pool(16) as pool:
+        with Pool(19) as pool:
             nodes = pool.map(node, [(game, move, self.depth) for move in game.moves])
         return (min, max)[game.turn](nodes, key=lambda node: node.value).move
 

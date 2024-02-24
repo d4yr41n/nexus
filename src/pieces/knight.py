@@ -11,5 +11,6 @@ class Knight(Piece):
     notation = 'N'
     repr = 'n', 'N'
     value = 3
+    index = 2
     vectors = 18, 33, 31, 14, -18, -33, -31, -14
 

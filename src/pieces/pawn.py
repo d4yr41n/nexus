@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 
 class Pawn(Piece):
     notation = ''
-    repr = 'p', 'P'
+    index = 1
     value = 1
     vectors = 17, 15
 

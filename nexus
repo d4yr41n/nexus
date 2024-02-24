@@ -23,9 +23,9 @@ class Client:
         help = False
         init_pair(1, COLOR_BLUE, -1)
         init_pair(2, COLOR_RED, -1)
+        ai_mode = False
 
         while True:
-
             if game.result is None:
                 result = '     '
             elif game.result == -1:
@@ -34,7 +34,7 @@ class Client:
                 result = '1 - 0'
             elif game.result == 0:
                 result = '0 - 0'
-            stdscr.erase() 
+            stdscr.clear()
             stdscr.addstr(f"White    {result}    Black\n\n")
             stdscr.addstr("    a b c d e f g h\n\n")
             for i in range(7, -1, -1):
@@ -58,13 +58,9 @@ class Client:
                 stdscr.addstr(17, 0, ' '.join(move for move in moves if move.startswith(data)))
     
             c = stdscr.getch()
-            if c == 113:
-                break
-            elif c == 10:
+            if c == 10:
                 if data == "ai":
-                    game.apply(ai.process(game))
-                    moves = game.annotate()
-                    help = False
+                    ai_mode = not ai_mode
                 elif data == "exit":
                     break
                 elif data == "cancel":
@@ -73,10 +69,13 @@ class Client:
                     help = False
                 elif (move := moves.get(data)):
                     game.apply(move)
-                    moves = game.annotate()
+                    if game.result is None:
+                        if  ai_mode:
+                            game.apply(ai.process(game))
+                        moves = game.annotate()
                     help = False
                 data = ''
-            elif c == 263:
+            elif c == 263 or c == 127:
                 data = data[:-1]
             elif c == 9:
                 help = not help

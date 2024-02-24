@@ -11,6 +11,7 @@ class Rook(SlidingPiece):
     notation = 'R'
     repr = 'r', 'R'
     value = 5
+    index = 4
     vectors = 1, 16, -1, -16
 
     def moves(self, game: Game, position: int) -> Generator[AbstractMove, None, None]: 

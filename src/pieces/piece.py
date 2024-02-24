@@ -1,7 +1,9 @@
 from __future__ import annotations
+
 from collections.abc import Generator
 from typing import TYPE_CHECKING
 
+from ..config import CHARS
 from ..empty import Empty
 from ..x88 import SQUARES
 
@@ -39,16 +41,15 @@ def get_vector(handler, target):
 
 class Piece(Empty):
     notation: str
-    repr: tuple[str, str]
     value: int
     vectors: tuple[int]
+
+    def __repr__(self) -> str:
+        return CHARS[(-self.index, self.index)[self.side]]
 
     def __init__(self, side: bool) -> None:
         super().__init__()
         self.side = side
-
-    def __repr__(self) -> str:
-        return self.repr[self.side]
 
     def __str__(self) -> str:
         return self.notation

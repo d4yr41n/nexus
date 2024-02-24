@@ -14,6 +14,7 @@ class King(Piece):
     notation = 'K'
     repr = 'k', 'K'
     value = 0
+    index = 6
     vectors = 1, 17, 16, 15, -1, -17, -16, -15
 
     def allowed(self, game, position) -> set:

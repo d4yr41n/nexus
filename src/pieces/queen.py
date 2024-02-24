@@ -5,5 +5,6 @@ class Queen(SlidingPiece):
     notation = 'Q'
     repr = 'q', 'Q'
     value = 9
+    index = 5
     vectors = 1, 17, 16, 15, -1, -17, -16, -15
 
