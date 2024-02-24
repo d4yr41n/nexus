@@ -1,2 +1,5 @@
-CHARS = ".󰡙󰡘󰡜󰡛󰡚󰡗󰡗󰡚󰡛󰡜󰡘󰡙"
+CHARS = ".PNBRQKkqrbnp"
+
+# Nerd Fonts
+# CHARS = ".󰡙󰡘󰡜󰡛󰡚󰡗󰡗󰡚󰡛󰡜󰡘󰡙"
 
