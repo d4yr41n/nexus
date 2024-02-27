@@ -1,5 +1,4 @@
 ### TODO
-
 - [ ] AI
   - [x] manual AI
     - [ ] performance optimization
